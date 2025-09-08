@@ -18,6 +18,9 @@
                 <div v-for="(phone, index) in estimate.phoneNumbers" :key="index" class="phone-bar">
                   <span class="phone-label">{{ phone.label }}:</span>
                   <span class="phone-number">{{ phone.number }}</span>
+                  <!-- <div class="phone-progress">
+                    <div class="progress-fill"></div>
+                  </div> -->
                 </div>
               </div>
             </div>
@@ -29,12 +32,8 @@
         </div>
 
         <div class="purpose-header">
-          {{ estimate.purpose || 'CONSTRUCTION ESTIMATE' }}
+          {{ estimate.purpose || 'PURPOSE (HEADER)' }}
         </div>
-       
-        <!-- <div class="calculation-info">
-          *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for Soft Item*
-        </div> -->
 
         <div class="estimate-table">
           <table>
@@ -43,29 +42,10 @@
                 <th class="description-header">Description</th>
                 <th class="dimensions-header">Dimensions</th>
                 <th class="unit-header">Unit</th>
-                <th class="type-header">Sq.ft</th>
                 <th class="quantity-header">Qty</th>
-                <th class="rate-header">
-                  Rate
-                  <br>
-                  <span class="calculation-guide">
-                    (Per Unit)
-                  </span>
-                </th>
-                <th class="price-header">
-                  Price
-                  <br>
-                  <span class="calculation-guide">
-                    (Sq.ft x Rate)
-                  </span>
-                </th>
-                <th class="total-header">
-                  Total (Rs.)
-                  <br>
-                  <span class="calculation-guide">
-                    (Price x Qty)
-                  </span>
-                </th>
+                <th class="rate-header">Rate</th>
+                <th class="price-header">Price</th>
+                <th class="total-header">Total (Rs.)</th>
               </tr>
             </thead>
             <tbody>
@@ -75,13 +55,9 @@
                 </tr>
                 <tr v-for="(item, itemIndex) in (category.items || [])" :key="`item-${categoryIndex}-${itemIndex}`"
                   class="item-row-table">
-                  <td class="description-cell">{{ item.description || '' }}</td>
-                  <td class="dimensions-cell">
-                    <span v-if="item.length && item.width">{{ item.length }} x {{ item.width }}</span>
-                    <span v-else>-</span>
-                  </td>
-                  <td class="unit-cell">{{ item.unit || 'Nos' }}</td>
-                  <td class="type-cell">{{ item.type || '-' }}</td>
+                  <td class="description-cell">{{ "" }}</td>
+                  <td class="dimensions-cell">{{ item.length }}<span v-if="item.width"> x {{ item.width }}</span></td>
+                  <td class="unit-cell">{{ item.unit || 'No' }}</td>
                   <td class="quantity-cell">{{ item.quantity || 1 }}</td>
                   <td class="rate-cell">{{ item.rate }}</td>
                   <td class="price-cell">{{ item.unitPrice }}</td>
@@ -89,25 +65,15 @@
                 </tr>
               </template>
               <tr class="total-row-table">
-                <td colspan="7" class="total-label-cell">Total</td>
+                <td colspan="6" class="total-label-cell">Total</td>
                 <td class="total-amount-cell">{{ calculateTotal() }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        
-        <div v-if="hasImages" class="image-gallery-section">
-          <div class="image-gallery-header">Image Gallery</div>
-          <div v-for="(image, index) in allImages" :key="`img-${index}`" class="image-figure">
-            <img :src="image.url" alt="Item Image" class="item-image" />
-            <figcaption>{{ image.description }}</figcaption>
-          </div>
-        </div>
-
       </div>
     </div>
-    
-    <div class="text-center mt-2">
+    <div class=" text-center mt-2">
       <v-btn color="primary" @click="exportToPDF" class="mr-4">
         <v-icon left>mdi-file-pdf-box</v-icon>
         Download PDF
@@ -124,7 +90,7 @@
 <script>
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, ImageRun } from 'docx'
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType } from 'docx'
 import { saveAs } from 'file-saver'
 
 export default {
@@ -147,33 +113,12 @@ export default {
           {
             name: '',
             items: [
-              { description: '', length: '6.5', width: '5', unit: 'Sq.ft', quantity: '1', rate: '32.5', unitPrice: '32.5', total: '11050', type: '32.50', imagePreviewUrl: null },
-              { description: '', length: '', width: '', unit: 'Nos', quantity: '1', rate: '27.5', unitPrice: '27.5', total: '9350', type: '-', imagePreviewUrl: null }
+              { description: '', length: '6.5', width: '5', unit: 'No', quantity: '1', rate: '32.5', unitPrice: '340', total: '11050' },
+              { description: '', length: '5.5', width: '5', unit: 'No', quantity: '1', rate: '27.5', unitPrice: '340', total: '9350' }
             ]
           },
         ]
       })
-    }
-  },
-  computed: {
-    allImages() {
-      const images = [];
-      if (this.estimate && this.estimate.categories) {
-        this.estimate.categories.forEach(category => {
-          category.items.forEach(item => {
-            if (item.imagePreviewUrl) {
-              images.push({
-                url: item.imagePreviewUrl,
-                description: item.description || ''
-              });
-            }
-          });
-        });
-      }
-      return images;
-    },
-    hasImages() {
-      return this.allImages.length > 0;
     }
   },
   methods: {
@@ -190,54 +135,93 @@ export default {
       }
       return total.toFixed(2)
     },
-    async exportToPDF() {
-      const element = this.$refs.estimateSheet;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageHeight = pdf.internal.pageSize.height;
-      let y = 10;
-      
-      const mainContentSelectors = ['.header-section', '.site-name', '.purpose-header', '.calculation-info', '.estimate-table'];
-      for (const selector of mainContentSelectors) {
-        const contentElement = element.querySelector(selector);
-        if (!contentElement) continue;
 
-        const canvas = await html2canvas(contentElement, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = pdf.internal.pageSize.width - 20;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        if (y + imgHeight > pageHeight - 10) {
-          pdf.addPage();
-          y = 10;
-        }
-        
-        pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
-        y += imgHeight + 5;
-      }
-      
-      const imageGalleryElement = element.querySelector('.image-gallery-section');
-      if (imageGalleryElement) {
-        const imageGalleryCanvas = await html2canvas(imageGalleryElement, { scale: 2 });
-        const imgData = imageGalleryCanvas.toDataURL('image/png');
-        const imgWidth = pdf.internal.pageSize.width - 20;
-        const imgHeight = (imageGalleryCanvas.height * imgWidth) / imageGalleryCanvas.width;
-        
-        if (y + imgHeight > pageHeight - 10) {
-          pdf.addPage();
-          y = 10;
-        }
-        
-        pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
-      }
-      
-      pdf.save(`estimate-${this.estimate.date || 'document'}.pdf`);
-    },
+    // async exportToPDF() {
+    //   const element = this.$refs.estimateSheet
+    //   const canvas = await html2canvas(element, {
+    //     scale: 2,
+    //     useCORS: true,
+    //     allowTaint: true
+    //   })
+
+    //   const imgData = canvas.toDataURL('image/png')
+    //   const pdf = new jsPDF('p', 'mm', 'a4')
+    //   const imgWidth = 210
+    //   const pageHeight = 297
+    //   const imgHeight = (canvas.height * imgWidth) / canvas.width
+    //   let heightLeft = imgHeight
+
+    //   let position = 0
+
+    //   pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+    //   heightLeft -= pageHeight
+
+    //   while (heightLeft >= 0) {
+    //     position = heightLeft - imgHeight
+    //     pdf.addPage()
+    //     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+    //     heightLeft -= pageHeight
+    //   }
+
+    //   pdf.save(`estimate-${this.estimate.date || 'document'}.pdf`)
+    // },
+
+    async exportToPDF() {
+  const element = this.$refs.estimateSheet;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageHeight = pdf.internal.pageSize.height;
+  let y = 10; // Initial Y position for content, with a top margin
+
+  // 1. Render the header and basic info as a single canvas
+  const headerSection = element.querySelector('.header-section');
+  const siteName = element.querySelector('.site-name');
+  const purposeHeader = element.querySelector('.purpose-header');
+
+  const headerCanvas = await html2canvas(headerSection, { scale: 2 });
+  const siteCanvas = await html2canvas(siteName, { scale: 2 });
+  const purposeCanvas = await html2canvas(purposeHeader, { scale: 2 });
+
+  const addImageToPdf = (canvas, yPos) => {
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = pdf.internal.pageSize.width - 20; // 10mm margin on each side
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 10, yPos, imgWidth, imgHeight);
+    return yPos + imgHeight + 5; // Return new Y position with a margin
+  };
+
+  y = addImageToPdf(headerCanvas, y);
+  y = addImageToPdf(siteCanvas, y);
+  y = addImageToPdf(purposeCanvas, y);
+
+  // 2. Process table rows one by one
+  const tableRows = element.querySelectorAll('table tbody tr');
+  
+  for (const row of tableRows) {
+    const rowCanvas = await html2canvas(row, { scale: 2 });
+    const rowHeight = (rowCanvas.height * (pdf.internal.pageSize.width - 20)) / rowCanvas.width;
+    
+    // Check if the row will fit on the current page
+    if (y + rowHeight > pageHeight - 10) { // Check against a bottom margin
+      pdf.addPage();
+      y = 10; // Reset Y position for the new page
+    }
+    
+    // Add the row image to the PDF
+    const imgData = rowCanvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 10, y, (pdf.internal.pageSize.width - 20), rowHeight);
+    y += rowHeight;
+  }
+
+  // 3. Save the PDF
+  pdf.save(`estimate-${this.estimate.date || 'document'}.pdf`);
+},
+
     async exportToWord() {
       const doc = new Document({
         sections: [{
           properties: {},
           children: [
-           // Company Name
+            // Company Name
             new Paragraph({
               children: [new TextRun({ text: this.estimate.companyName || 'COMPANY NAME', bold: true, size: 32 })],
               alignment: AlignmentType.CENTER
@@ -267,47 +251,51 @@ export default {
               children: [new TextRun({ text: this.estimate.description || 'Project Description' })],
               alignment: AlignmentType.CENTER
             }),
+
+            // Create table for estimate items
             new Table({
               rows: this.createTableRows()
-            }),
-            ...this.createImageParagraphs()
+            })
           ]
         }]
       })
+
       const blob = await Packer.toBlob(doc)
       saveAs(blob, `estimate-${this.estimate.date || 'document'}.docx`)
     },
+
     createTableRows() {
       const rows = []
+
+      // Add table headers
       rows.push(new TableRow({
         children: [
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Description', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Dimensions', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Unit', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Sq.ft', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Qty', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Rate', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Price', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Total (Rs.)', bold: true })] })] })
         ]
       }));
+
       this.estimate.categories.forEach(category => {
         if (category.name) {
           rows.push(new TableRow({
             children: [
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: category.name, bold: true })] })] }),
-              ...Array(7).fill().map(() => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '' })] })] }))
+              ...Array(6).fill().map(() => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '' })] })] }))
             ]
           }))
         }
+
         category.items.forEach(item => {
-          const hasDimensions = item.length > 0 && item.width > 0;
           rows.push(new TableRow({
             children: [
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.description || '' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: hasDimensions ? `${item.length} x ${item.width}` : '-' })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${item.length || ''} x ${item.width || ''}` })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.unit || 'No' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.type || '-' })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.quantity || '1' })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.rate || '' })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.unitPrice || '' })] })] }),
@@ -316,38 +304,17 @@ export default {
           }))
         })
       })
+
+      // Total row
       rows.push(new TableRow({
         children: [
-          ...Array(6).fill().map(() => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '' })] })] })),
+          ...Array(5).fill().map(() => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '' })] })] })),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Total', bold: true })] })] }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${this.calculateTotal()}`, bold: true })] })] })
         ]
       }))
+
       return rows
-    },
-    createImageParagraphs() {
-      const paragraphs = [];
-      paragraphs.push(new Paragraph({ children: [new TextRun({ text: 'Image Gallery', bold: true, size: 28 })] }));
-      this.allImages.forEach(image => {
-        paragraphs.push(new Paragraph({
-          children: [
-            new ImageRun({
-              data: image.url,
-              transformation: {
-                width: 500,
-                height: 300
-              }
-            })
-          ]
-        }));
-        paragraphs.push(new Paragraph({
-          children: [
-            new TextRun({ text: image.description, italics: true })
-          ],
-          alignment: AlignmentType.CENTER
-        }));
-      });
-      return paragraphs;
     }
   }
 }
@@ -361,6 +328,7 @@ export default {
   background-color: #f5f5f5;
   min-height: 100vh;
 }
+
 .a4-sheet {
   width: 210mm;
   min-height: 297mm;
@@ -374,11 +342,15 @@ export default {
   color: #000;
   position: relative;
 }
+
+/* Reduced header spacing significantly */
 .header-section {
   margin-bottom: 8px;
   border-bottom: 1px solid #000;
   padding-bottom: 5px;
 }
+
+/* Added company name styling at top center */
 .company-name {
   text-align: center;
   font-size: 18px;
@@ -388,47 +360,72 @@ export default {
   letter-spacing: 1px;
   color: #000;
 }
+
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 5px;
 }
+
 .date-section {
   font-size: 14px;
   font-weight: bold;
   color: #000;
 }
+
 .person-section {
   text-align: right;
 }
+
 .person-name {
   font-size: 14px;
   font-weight: bold;
   margin-bottom: 3px;
   color: #000;
 }
+
 .phone-numbers {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
+
 .phone-bar {
   display: flex;
   align-items: center;
   gap: 5px;
   font-size: 10px;
 }
+
 .phone-label {
   min-width: 35px;
   font-weight: 500;
 }
+
 .phone-number {
   min-width: 80px;
   font-size: 10px;
   font-weight: 500;
   color: #000;
 }
+
+.phone-progress {
+  width: 60px;
+  height: 4px;
+  background-color: #e8e8e8;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid #999;
+}
+
+.progress-fill {
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50 0%, #2196F3 100%);
+}
+
+/* Reduced site name and purpose spacing */
 .site-name {
   text-align: center;
   font-size: 16px;
@@ -438,6 +435,7 @@ export default {
   letter-spacing: 1px;
   color: #000;
 }
+
 .purpose-header {
   font-size: 14px;
   font-weight: bold;
@@ -445,22 +443,20 @@ export default {
   text-transform: uppercase;
   color: #000;
 }
-.calculation-info {
-  font-style: italic;
-  font-size: 12px;
-  margin-bottom: 10px;
-  text-align: left;
-}
+
+/* New styles for the table structure */
 .estimate-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
   font-family: 'Times New Roman', serif;
 }
+
 thead th {
   background-color: #f2f2f2;
   border-bottom: 2px solid #000;
@@ -468,71 +464,80 @@ thead th {
   text-align: left;
   font-weight: bold;
 }
+
 th.description-header {
   width: 20%;
 }
+
 th.dimensions-header {
+  width: 15%;
+  text-align: center;
+}
+
+th.unit-header {
   width: 10%;
   text-align: center;
 }
-th.unit-header {
-  width: 8%;
-  text-align: center;
-}
-th.type-header {
-  width: 8%;
-  text-align: center;
-}
+
 th.quantity-header {
-  width: 8%;
+  width: 10%;
   text-align: center;
 }
+
 th.rate-header {
   width: 10%;
   text-align: right;
 }
+
 th.price-header {
   width: 15%;
   text-align: right;
 }
+
 th.total-header {
-  width: 15%;
+  width: 20%;
   text-align: right;
-  line-height: 1.2;
 }
+
 .category-row .category-cell {
   font-weight: bold;
   padding: 10px 0 5px 0;
   border-bottom: 1px solid #ccc;
 }
+
 .item-row-table td {
   padding: 5px 10px;
   vertical-align: top;
   border-bottom: 1px dashed #eee;
 }
+
 .description-cell {
   font-style: italic;
   font-size: 13px;
 }
+
 .dimensions-cell,
 .unit-cell,
-.type-cell,
 .quantity-cell {
   text-align: center;
 }
+
 .rate-cell,
 .price-cell,
 .total-cell {
   text-align: right;
 }
+
 .total-row-table {
   font-weight: bold;
   border-top: 2px solid #000;
 }
+
 .total-label-cell {
   text-align: right;
   padding: 10px 10px 10px 0;
 }
+
 .total-amount-cell {
   padding: 10px 10px 10px 0;
   text-align: right;
@@ -540,35 +545,31 @@ th.total-header {
   color: #000;
 }
 
-.image-gallery-section {
-  margin-top: 20px;
-  border-top: 1px solid #000;
-  padding-top: 10px;
-}
-.image-gallery-header {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-align: center;
-}
-.image-figure {
-  text-align: center;
-  margin-bottom: 20px;
-  page-break-inside: avoid;
-}
-.item-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-figcaption {
-  font-style: italic;
-  margin-top: 5px;
-}
-.calculation-guide {
-  font-size: 10px;
-  font-weight: normal;
-  display: block;
+/* Enhanced print styles for better A4 output */
+@media print {
+  .a4-container {
+    padding: 0;
+    background: white;
+  }
+
+  .a4-sheet {
+    box-shadow: none;
+    margin: 0;
+    padding: 15mm;
+    width: 100%;
+    max-width: none;
+  }
+
+  .export-buttons {
+    display: none;
+  }
+
+  .company-name {
+    font-size: 20px;
+  }
+
+  .site-name {
+    font-size: 16px;
+  }
 }
 </style>

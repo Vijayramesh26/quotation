@@ -104,16 +104,6 @@
 
           <div v-for="(item, itemIndex) in category.items" :key="itemIndex" class="item-row">
             <v-row>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="item.description"
-                  label="Item Description"
-                  outlined
-                  dense
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
               <v-col cols="6" md="2">
                 <v-text-field
                   v-model.number="item.length"
@@ -135,15 +125,6 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="6" md="1">
-                <v-select
-                  v-model="item.unit"
-                  :items="unitOptions"
-                  label="Unit"
-                  outlined
-                  dense
-                ></v-select>
-              </v-col>
-              <v-col cols="6" md="2">
                 <v-text-field
                   v-model.number="item.quantity"
                   label="Qty"
@@ -153,7 +134,7 @@
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
-              <v-col cols="8" md="2">
+              <v-col cols="6" md="2">
                 <v-text-field
                   v-model.number="item.rate"
                   label="Rate"
@@ -163,7 +144,7 @@
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
-              <v-col cols="4" md="2">
+              <v-col cols="8" md="2">
                 <v-text-field
                   :value="item.total"
                   label="Total"
@@ -172,23 +153,13 @@
                   readonly
                 ></v-text-field>
               </v-col>
-            </v-row>
-            <v-row class="mt-0">
-              <v-col cols="12" class="d-flex align-center">
-                <v-file-input
-                  v-model="item.imageFile"
-                  label="Upload Image for this Item (Optional)"
-                  accept="image/*"
-                  prepend-icon="mdi-camera"
-                  outlined
-                  dense
-                ></v-file-input>
+              <v-col cols="4" md="2" class="d-flex align-center">
                 <v-btn
                   color="secondary"
                   icon
                   small
                   @click="removeItem(categoryIndex, itemIndex)"
-                  class="ml-2 mr-2"
+                  class="mr-2"
                 >
                   <v-icon>mdi-minus</v-icon>
                 </v-btn>
@@ -245,9 +216,11 @@
   </v-container>
 </template>
 
+// EstimateForm.vue
 <script>
 export default {
   name: 'EstimateForm',
+  // Accept the value prop from the parent
   props: {
     value: {
       type: Object,
@@ -257,10 +230,11 @@ export default {
   data() {
     return {
       valid: false,
-      unitOptions: ['Nos', 'Pcs', 'Sq.ft', 'Cu.ft', 'Mtrs', 'Lumpsum']
     }
   },
   computed: {
+    // This writable computed property creates the two-way sync.
+    // It gets its value from the 'value' prop and emits an 'input' event when updated.
     estimate: {
       get() {
         return this.value;
@@ -281,17 +255,12 @@ export default {
       this.estimate.categories.push({
         name: '',
         items: [{
-          description: '',
-          length: '',
-          width: '',
-          unit: 'Nos',
+          length: 0,
+          width: 0,
           quantity: 1,
           rate: 0,
-          unitPrice: 0,
           total: 0,
-          type: '',
-          imageFile: null,
-          imagePreviewUrl: null
+          unitPrice: 0
         }]
       })
     },
@@ -302,17 +271,12 @@ export default {
     },
     addItem(categoryIndex) {
       this.estimate.categories[categoryIndex].items.push({
-        description: '',
-        length: '',
-        width: '',
-        unit: 'Nos',
+        length: 0,
+        width: 0,
         quantity: 1,
         rate: 0,
-        unitPrice: 0,
         total: 0,
-        type: '',
-        imageFile: null,
-        imagePreviewUrl: null
+        unitPrice: 0
       })
     },
     removeItem(categoryIndex, itemIndex) {
@@ -321,50 +285,25 @@ export default {
         category.items.splice(itemIndex, 1);
       }
     },
-    calculateItemTotal(categoryIndex, itemIndex) {
-        const item = this.estimate.categories[categoryIndex].items[itemIndex];
-        const rate = parseFloat(item.rate) || 0;
-        const quantity = parseFloat(item.quantity) || 0;
-        
-        // Check if length and width are provided for area-based calculation
-        const hasDimensions = item.length > 0 && item.width > 0;
-        
-        let unitPrice;
-        let totalValue;
-        
-        if (hasDimensions) {
-            const area = parseFloat(item.length) * parseFloat(item.width);
-            item.type = area.toFixed(2);
-            unitPrice = area * rate;
-            totalValue = unitPrice * quantity;
-        } else {
-            item.type = '-';
-            unitPrice = rate;
-            totalValue = rate * quantity;
-        }
-        
-        item.unitPrice = unitPrice.toFixed(2);
-        item.total = totalValue.toFixed(2);
-    },
-    async previewEstimate() {
-        for (const category of this.estimate.categories) {
-          for (const item of category.items) {
-            if (item.imageFile) {
-              item.imagePreviewUrl = await this.fileToBase64(item.imageFile);
-            } else {
-              item.imagePreviewUrl = null;
-            }
-          }
-        }
-        this.$emit('preview');
-    },
-    fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
+ calculateItemTotal(categoryIndex, itemIndex) {
+    const item = this.estimate.categories[categoryIndex].items[itemIndex];
+    let totalValue;
+
+    // Check if both length and width are falsy (empty, 0, null, etc.)
+    if (!item.length && !item.width) {
+        // If no dimensions, calculate total using only quantity and rate
+        totalValue = (item.quantity || 1) * (item.rate || 0);
+    } else {
+        // Otherwise, calculate based on area, quantity, and rate
+        const area = (item.length || 0) * (item.width || 0);
+        totalValue = area * (item.quantity || 1) * (item.rate || 0);
+    }
+
+    item.total = totalValue.toFixed(2);
+},
+    previewEstimate() {
+      // No need to pass data, as the parent already has the most recent data
+      this.$emit('preview');
     }
   }
 }
