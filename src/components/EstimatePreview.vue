@@ -1,21 +1,28 @@
 <template>
   <v-container fluid class="pa-0">
-
+    
     <div class="a4-container">
       <div class="a4-sheet" ref="estimateSheet">
         <div class="header-section">
           <div class="company-name">
-            {{ estimate.companyName || 'COMPANY NAME' }}
+            {{ estimate.companyName }}
           </div>
 
           <div class="info-row">
             <div class="date-section">
-              {{ estimate.date || '21-08-2025' }}
+              {{ estimate.date }}
             </div>
             <div class="person-section">
-              <div class="person-name">{{ estimate.personName || 'P.Ramesh' }}</div>
-              <div class="phone-numbers" v-if="estimate.phoneNumbers && estimate.phoneNumbers.length">
-                <div v-for="(phone, index) in estimate.phoneNumbers" :key="index" class="phone-bar">
+              <div class="person-name">{{ estimate.personName }}</div>
+              <div
+                class="phone-numbers"
+                v-if="estimate.phoneNumbers && estimate.phoneNumbers.length"
+              >
+                <div
+                  v-for="(phone, index) in estimate.phoneNumbers"
+                  :key="index"
+                  class="phone-bar"
+                >
                   <span class="phone-label">{{ phone.label }}:</span>
                   <span class="phone-number">{{ phone.number }}</span>
                 </div>
@@ -25,16 +32,17 @@
         </div>
 
         <div class="site-name">
-          {{ estimate.siteName || 'SITE NAME' }}
+          {{ estimate.siteName }}
         </div>
 
-        <div class="purpose-header">
-          {{ estimate.purpose || 'CONSTRUCTION ESTIMATE' }}
+        <div class="purpose-header text-center">
+          {{ estimate.purpose || "CONSTRUCTION ESTIMATE" }}
         </div>
-       
-        <!-- <div class="calculation-info">
-          *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for Soft Item*
-        </div> -->
+
+        <div class="calculation-info">
+          *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for Sq.ft
+          Item*
+        </div>
 
         <div class="estimate-table">
           <table>
@@ -47,42 +55,47 @@
                 <th class="quantity-header">Qty</th>
                 <th class="rate-header">
                   Rate
-                  <br>
-                  <span class="calculation-guide">
-                    (Per Unit)
-                  </span>
+                  <br />
+                  <span class="calculation-guide"> (Per Unit) </span>
                 </th>
                 <th class="price-header">
                   Price
-                  <br>
-                  <span class="calculation-guide">
-                    (Sq.ft x Rate)
-                  </span>
+                  <br />
+                  <span class="calculation-guide"> (Sq.ft x Rate) </span>
                 </th>
                 <th class="total-header">
                   Total (Rs.)
-                  <br>
-                  <span class="calculation-guide">
-                    (Price x Qty)
-                  </span>
+                  <br />
+                  <span class="calculation-guide"> (Price x Qty) </span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              <template v-for="(category, categoryIndex) in (estimate.categories || [])">
-                <tr v-if="category.name" class="category-row" :key="`category-${categoryIndex}`">
+              <template
+                v-for="(category, categoryIndex) in estimate.categories || []"
+              >
+                <tr
+                  v-if="category.name"
+                  class="category-row"
+                  :key="`category-${categoryIndex}`"
+                >
                   <td colspan="8" class="category-cell">{{ category.name }}</td>
                 </tr>
-                <tr v-for="(item, itemIndex) in (category.items || [])" :key="`item-${categoryIndex}-${itemIndex}`"
-                  class="item-row-table">
-                  <td class="description-cell">{{ item.description || '' }}</td>
+                <tr
+                  v-for="(item, itemIndex) in category.items || []"
+                  :key="`item-${categoryIndex}-${itemIndex}`"
+                  class="item-row-table"
+                >
+                  <td class="description-cell">{{ item.description || "" }}</td>
                   <td class="dimensions-cell">
-                    <span v-if="item.length && item.width">{{ item.length }} x {{ item.width }}</span>
+                    <span v-if="item.length && item.width"
+                      >{{ item.length }} x {{ item.width }}</span
+                    >
                     <span v-else>-</span>
                   </td>
-                  <td class="unit-cell">{{ item.unit || 'Nos' }}</td>
-                  <td class="type-cell">{{ item.type || '-' }}</td>
-                  <td class="quantity-cell">{{ item.quantity || 1 }}</td>
+                  <td class="unit-cell">{{ item.unit || "Nos" }}</td>
+                  <td class="type-cell">{{ item.type || "-" }}</td>
+                  <td class="quantity-cell">{{ item.quantity  }}</td>
                   <td class="rate-cell">{{ item.rate }}</td>
                   <td class="price-cell">{{ item.unitPrice }}</td>
                   <td class="total-cell">{{ item.total }}</td>
@@ -95,18 +108,21 @@
             </tbody>
           </table>
         </div>
-        
+
         <div v-if="hasImages" class="image-gallery-section">
           <div class="image-gallery-header">Image Gallery</div>
-          <div v-for="(image, index) in allImages" :key="`img-${index}`" class="image-figure">
+          <div
+            v-for="(image, index) in allImages"
+            :key="`img-${index}`"
+            class="image-figure"
+          >
             <img :src="image.url" alt="Item Image" class="item-image" />
             <figcaption>{{ image.description }}</figcaption>
           </div>
         </div>
-
       </div>
     </div>
-    
+
     <div class="text-center mt-2">
       <v-btn color="primary" @click="exportToPDF" class="mr-4">
         <v-icon left>mdi-file-pdf-box</v-icon>
@@ -117,54 +133,86 @@
         Download Word
       </v-btn>
     </div>
-
   </v-container>
 </template>
 
 <script>
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, ImageRun } from 'docx'
-import { saveAs } from 'file-saver'
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableRow,
+  TableCell,
+  TextRun,
+  AlignmentType,
+  ImageRun,
+} from "docx";
+import { saveAs } from "file-saver";
 
 export default {
-  name: 'EstimatePreview',
+  name: "EstimatePreview",
   props: {
     estimate: {
       type: Object,
       default: () => ({
-        companyName: 'ABC CONSTRUCTION COMPANY',
-        date: '21-08-2025',
-        personName: 'P.Ramesh',
+        companyName: "ABC CONSTRUCTION COMPANY",
+        date: "21-08-2025",
+        personName: "P.Ramesh",
         phoneNumbers: [
-          { label: 'Mobile', number: '9876543210' },
-          { label: 'Office', number: '0431-2345678' }
+          { label: "Mobile", number: "9876543210" },
+          { label: "Office", number: "0431-2345678" },
         ],
-        siteName: 'RESIDENTIAL BUILDING PROJECT',
-        purpose: 'CONSTRUCTION ESTIMATE',
-        description: 'This is a detailed description of the construction estimate.',
+        siteName: "RESIDENTIAL BUILDING PROJECT",
+        purpose: "CONSTRUCTION ESTIMATE",
+        description:
+          "This is a detailed description of the construction estimate.",
         categories: [
           {
-            name: '',
+            name: "",
             items: [
-              { description: '', length: '6.5', width: '5', unit: 'Sq.ft', quantity: '1', rate: '32.5', unitPrice: '32.5', total: '11050', type: '32.50', imagePreviewUrl: null },
-              { description: '', length: '', width: '', unit: 'Nos', quantity: '1', rate: '27.5', unitPrice: '27.5', total: '9350', type: '-', imagePreviewUrl: null }
-            ]
+              {
+                description: "",
+                length: "6.5",
+                width: "5",
+                unit: "Nos",
+                quantity: "1",
+                rate: "32.5",
+                unitPrice: "32.5",
+                total: "11050",
+                type: "32.50",
+                imagePreviewUrl: null,
+              },
+              {
+                description: "",
+                length: "",
+                width: "",
+                unit: "Nos",
+                quantity: "1",
+                rate: "27.5",
+                unitPrice: "27.5",
+                total: "9350",
+                type: "-",
+                imagePreviewUrl: null,
+              },
+            ],
           },
-        ]
-      })
-    }
+        ],
+      }),
+    },
   },
   computed: {
     allImages() {
       const images = [];
       if (this.estimate && this.estimate.categories) {
-        this.estimate.categories.forEach(category => {
-          category.items.forEach(item => {
+        this.estimate.categories.forEach((category) => {
+          category.items.forEach((item) => {
             if (item.imagePreviewUrl) {
               images.push({
                 url: item.imagePreviewUrl,
-                description: item.description || ''
+                description: item.description || "",
               });
             }
           });
@@ -174,183 +222,387 @@ export default {
     },
     hasImages() {
       return this.allImages.length > 0;
-    }
+    },
   },
   methods: {
     calculateTotal() {
-      let total = 0
+      let total = 0;
       if (this.estimate && this.estimate.categories) {
-        this.estimate.categories.forEach(category => {
+        this.estimate.categories.forEach((category) => {
           if (category.items) {
-            category.items.forEach(item => {
-              total += parseFloat(item.total) || 0
-            })
+            category.items.forEach((item) => {
+              total += parseFloat(item.total) || 0;
+            });
           }
-        })
+        });
       }
-      return total.toFixed(2)
+      return total.toFixed(2);
     },
     async exportToPDF() {
       const element = this.$refs.estimateSheet;
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF("p", "mm", "a4");
       const pageHeight = pdf.internal.pageSize.height;
       let y = 10;
-      
-      const mainContentSelectors = ['.header-section', '.site-name', '.purpose-header', '.calculation-info', '.estimate-table'];
+
+      const mainContentSelectors = [
+        ".header-section",
+        ".site-name",
+        ".purpose-header",
+        ".calculation-info",
+        ".estimate-table",
+      ];
       for (const selector of mainContentSelectors) {
         const contentElement = element.querySelector(selector);
         if (!contentElement) continue;
 
         const canvas = await html2canvas(contentElement, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL("image/png");
         const imgWidth = pdf.internal.pageSize.width - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
+
         if (y + imgHeight > pageHeight - 10) {
           pdf.addPage();
           y = 10;
         }
-        
-        pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
+
+        pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
         y += imgHeight + 5;
       }
-      
-      const imageGalleryElement = element.querySelector('.image-gallery-section');
+
+      const imageGalleryElement = element.querySelector(
+        ".image-gallery-section"
+      );
       if (imageGalleryElement) {
-        const imageGalleryCanvas = await html2canvas(imageGalleryElement, { scale: 2 });
-        const imgData = imageGalleryCanvas.toDataURL('image/png');
+        const imageGalleryCanvas = await html2canvas(imageGalleryElement, {
+          scale: 2,
+        });
+        const imgData = imageGalleryCanvas.toDataURL("image/png");
         const imgWidth = pdf.internal.pageSize.width - 20;
-        const imgHeight = (imageGalleryCanvas.height * imgWidth) / imageGalleryCanvas.width;
-        
+        const imgHeight =
+          (imageGalleryCanvas.height * imgWidth) / imageGalleryCanvas.width;
+
         if (y + imgHeight > pageHeight - 10) {
           pdf.addPage();
           y = 10;
         }
-        
-        pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
+
+        pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
       }
-      
-      pdf.save(`estimate-${this.estimate.date || 'document'}.pdf`);
+
+      pdf.save(`estimate-${this.estimate.date || "document"}.pdf`);
     },
     async exportToWord() {
       const doc = new Document({
-        sections: [{
-          properties: {},
-          children: [
-           // Company Name
-            new Paragraph({
-              children: [new TextRun({ text: this.estimate.companyName || 'COMPANY NAME', bold: true, size: 32 })],
-              alignment: AlignmentType.CENTER
-            }),
+        sections: [
+          {
+            properties: {},
+            children: [
+              // Company Name
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: this.estimate.companyName || "COMPANY NAME",
+                    bold: true,
+                    size: 32,
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+              }),
 
-            // Date and Person Info
-            new Paragraph({
-              children: [
-                new TextRun({ text: `Date: ${this.estimate.date}`, size: 24 }),
-                new TextRun({ text: `\t\t\tPerson: ${this.estimate.personName}`, size: 24 })
-              ]
-            }),
+              // Date and Person Info
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Date: ${this.estimate.date}`,
+                    size: 24,
+                  }),
+                  new TextRun({
+                    text: `\t\t\tPerson: ${this.estimate.personName}`,
+                    size: 24,
+                  }),
+                ],
+              }),
 
-            // Site Name
-            new Paragraph({
-              children: [new TextRun({ text: this.estimate.siteName || 'SITE NAME', bold: true, size: 28 })],
-              alignment: AlignmentType.CENTER
-            }),
+              // Site Name
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: this.estimate.siteName || "SITE NAME",
+                    bold: true,
+                    size: 28,
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+              }),
 
-            // Purpose
-            new Paragraph({
-              children: [new TextRun({ text: this.estimate.purpose || 'PURPOSE (HEADER)', bold: true, size: 24 })]
-            }),
+              // Purpose
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: this.estimate.purpose || "PURPOSE (HEADER)",
+                    bold: true,
+                    size: 24,
+                  }),
+                ],
+              }),
 
-            // Description
-            new Paragraph({
-              children: [new TextRun({ text: this.estimate.description || 'Project Description' })],
-              alignment: AlignmentType.CENTER
-            }),
-            new Table({
-              rows: this.createTableRows()
-            }),
-            ...this.createImageParagraphs()
-          ]
-        }]
-      })
-      const blob = await Packer.toBlob(doc)
-      saveAs(blob, `estimate-${this.estimate.date || 'document'}.docx`)
+              // Description
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: this.estimate.description || "Project Description",
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+              }),
+              new Table({
+                rows: this.createTableRows(),
+              }),
+              ...this.createImageParagraphs(),
+            ],
+          },
+        ],
+      });
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `estimate-${this.estimate.date || "document"}.docx`);
     },
     createTableRows() {
-      const rows = []
-      rows.push(new TableRow({
-        children: [
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Description', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Dimensions', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Unit', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Sq.ft', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Qty', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Rate', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Price', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Total (Rs.)', bold: true })] })] })
-        ]
-      }));
-      this.estimate.categories.forEach(category => {
-        if (category.name) {
-          rows.push(new TableRow({
-            children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: category.name, bold: true })] })] }),
-              ...Array(7).fill().map(() => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '' })] })] }))
-            ]
-          }))
-        }
-        category.items.forEach(item => {
-          const hasDimensions = item.length > 0 && item.width > 0;
-          rows.push(new TableRow({
-            children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.description || '' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: hasDimensions ? `${item.length} x ${item.width}` : '-' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.unit || 'No' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.type || '-' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.quantity || '1' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.rate || '' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.unitPrice || '' })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${item.total}` })] })] }),
-            ]
-          }))
+      const rows = [];
+      rows.push(
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Description", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Dimensions", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Unit", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Sq.ft", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Qty", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Rate", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Price", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Total (Rs.)", bold: true })],
+                }),
+              ],
+            }),
+          ],
         })
-      })
-      rows.push(new TableRow({
-        children: [
-          ...Array(6).fill().map(() => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '' })] })] })),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Total', bold: true })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${this.calculateTotal()}`, bold: true })] })] })
-        ]
-      }))
-      return rows
+      );
+      this.estimate.categories.forEach((category) => {
+        if (category.name) {
+          rows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: category.name, bold: true }),
+                      ],
+                    }),
+                  ],
+                }),
+                ...Array(7)
+                  .fill()
+                  .map(
+                    () =>
+                      new TableCell({
+                        children: [
+                          new Paragraph({
+                            children: [new TextRun({ text: "" })],
+                          }),
+                        ],
+                      })
+                  ),
+              ],
+            })
+          );
+        }
+        category.items.forEach((item) => {
+          const hasDimensions = item.length > 0 && item.width > 0;
+          rows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: item.description || "" })],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: hasDimensions
+                            ? `${item.length} x ${item.width}`
+                            : "-",
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: item.unit || "No" })],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: item.type || "-" })],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: item.quantity || "1" })],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: item.rate || "" })],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: item.unitPrice || "" })],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: `${item.total}` })],
+                    }),
+                  ],
+                }),
+              ],
+            })
+          );
+        });
+      });
+      rows.push(
+        new TableRow({
+          children: [
+            ...Array(6)
+              .fill()
+              .map(
+                () =>
+                  new TableCell({
+                    children: [
+                      new Paragraph({ children: [new TextRun({ text: "" })] }),
+                    ],
+                  })
+              ),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "Total", bold: true })],
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: `${this.calculateTotal()}`,
+                      bold: true,
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+      return rows;
     },
     createImageParagraphs() {
       const paragraphs = [];
-      paragraphs.push(new Paragraph({ children: [new TextRun({ text: 'Image Gallery', bold: true, size: 28 })] }));
-      this.allImages.forEach(image => {
-        paragraphs.push(new Paragraph({
+      paragraphs.push(
+        new Paragraph({
           children: [
-            new ImageRun({
-              data: image.url,
-              transformation: {
-                width: 500,
-                height: 300
-              }
-            })
-          ]
-        }));
-        paragraphs.push(new Paragraph({
-          children: [
-            new TextRun({ text: image.description, italics: true })
+            new TextRun({ text: "Image Gallery", bold: true, size: 28 }),
           ],
-          alignment: AlignmentType.CENTER
-        }));
+        })
+      );
+      this.allImages.forEach((image) => {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: image.url,
+                transformation: {
+                  width: 500,
+                  height: 300,
+                },
+              }),
+            ],
+          })
+        );
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: image.description, italics: true })],
+            alignment: AlignmentType.CENTER,
+          })
+        );
       });
       return paragraphs;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -368,7 +620,7 @@ export default {
   background: white;
   padding: 20mm 15mm;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-family: 'Times New Roman', serif;
+  font-family: "Times New Roman", serif;
   font-size: 14px;
   line-height: 1.4;
   color: #000;
@@ -459,7 +711,7 @@ export default {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Times New Roman', serif;
+  font-family: "Times New Roman", serif;
 }
 thead th {
   background-color: #f2f2f2;

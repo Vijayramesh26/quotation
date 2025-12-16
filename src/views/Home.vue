@@ -1,4 +1,4 @@
- <template>
+<template>
   <v-app>
     <v-app-bar app color="primary" dark>
       <v-toolbar-title>Construction Estimate System</v-toolbar-title>
@@ -10,12 +10,15 @@
     </v-app-bar>
 
     <v-main>
-      <EstimateForm 
+      <EstimateForm
         v-if="currentView === 'form'"
         v-model="estimateData"
         @preview="showPreview"
       />
-      <EstimatePreview v-if="currentView === 'preview'" :estimate="formattedEstimate" />
+      <EstimatePreview
+        v-if="currentView === 'preview'"
+        :estimate="formattedEstimate"
+      />
     </v-main>
 
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
@@ -30,49 +33,54 @@
 </template>
 
 <script>
-import EstimateForm from '../components/EstimateForm.vue'
-import EstimatePreview from '../components/EstimatePreview.vue'
+import EstimateForm from "../components/EstimateForm.vue";
+import EstimatePreview from "../components/EstimatePreview.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     EstimateForm,
-    EstimatePreview
+    EstimatePreview,
   },
   data() {
     return {
-      currentView: 'form',
+      currentView: "form",
       // The single source of truth for all form data
       estimateData: {
         date: new Date().toISOString().substr(0, 10),
-        companyName: '',
-        siteName: '',
-        purpose: '',
-        personName: '',
-        phoneNumber1: '',
-        phoneNumber2: '',
+        companyName: "",
+        siteName: "",
+        purpose: "",
+        personName: "",
+        phoneNumber1: "",
+        phoneNumber2: "",
         categories: [
           {
-            name: '',
+            name: "",
             items: [
               {
-                length: 0,
-                width: 0,
+                description: "",
+                length: "",
+                width: "",
+                unit: "Nos",
                 quantity: 1,
                 rate: 0,
+                unitPrice: 0,
                 total: 0,
-                unitPrice: 0
-              }
-            ]
-          }
-        ]
+                type: "",
+                imageFile: null,
+                imagePreviewUrl: null,
+              },
+            ],
+          },
+        ],
       },
       snackbar: {
         show: false,
-        message: '',
-        color: 'success'
-      }
-    }
+        message: "",
+        color: "success",
+      },
+    };
   },
   computed: {
     formattedEstimate() {
@@ -81,44 +89,44 @@ export default {
         ...this.estimateData,
         date: this.formatDate(this.estimateData.date),
         phoneNumbers: this.formatPhoneNumbers(this.estimateData),
-        categories: this.estimateData.categories.map(category => ({
-            ...category,
-            items: category.items.map(item => ({
-                ...item,
-                description: category.name || 'Item Description' // Use category name as description
-            }))
-        }))
-      }
-    }
+        categories: this.estimateData.categories.map((category) => ({
+          ...category,
+          items: category.items.map((item) => ({
+            ...item,
+            // description: category.name || "Item Description", // Use category name as description
+          })),
+        })),
+      };
+    },
   },
   methods: {
     showPreview() {
-      this.currentView = 'preview'
-      this.showSnackbar('Estimate preview generated successfully!', 'success')
+      this.currentView = "preview";
+      this.showSnackbar("Estimate preview generated successfully!", "success");
     },
     goBackToForm() {
-      this.currentView = 'form'
+      this.currentView = "form";
     },
     formatDate(dateString) {
-      if (!dateString) return new Date().toLocaleDateString('en-GB')
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-GB')
+      if (!dateString) return new Date().toLocaleDateString("en-GB");
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-GB");
     },
     formatPhoneNumbers(estimateData) {
-      const phones = []
+      const phones = [];
       if (estimateData.phoneNumber1) {
-        phones.push({ label: 'Mobile', number: estimateData.phoneNumber1 })
+        phones.push({ label: "Mobile", number: estimateData.phoneNumber1 });
       }
       if (estimateData.phoneNumber2) {
-        phones.push({ label: 'Office', number: estimateData.phoneNumber2 })
+        phones.push({ label: "Office", number: estimateData.phoneNumber2 });
       }
-      return phones
+      return phones;
     },
-    showSnackbar(message, color = 'success') {
-      this.snackbar.message = message
-      this.snackbar.color = color
-      this.snackbar.show = true
-    }
-  }
-}
+    showSnackbar(message, color = "success") {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
+  },
+};
 </script>
