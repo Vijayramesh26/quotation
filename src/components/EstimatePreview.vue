@@ -239,6 +239,13 @@ export default {
     },
     async exportToPDF() {
       const element = this.$refs.estimateSheet;
+
+      // ✅ Wait for Vue DOM update
+      await this.$nextTick();
+
+      // ✅ Wait for all images inside estimate sheet
+      await this.waitForImages(element);
+
       const pdf = new jsPDF("p", "mm", "a4");
       const pageHeight = pdf.internal.pageSize.height;
       let y = 10;
@@ -250,11 +257,20 @@ export default {
         ".calculation-info",
         ".estimate-table",
       ];
+
       for (const selector of mainContentSelectors) {
         const contentElement = element.querySelector(selector);
         if (!contentElement) continue;
 
-        const canvas = await html2canvas(contentElement, { scale: 2 });
+        const canvas = await html2canvas(contentElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+        });
+
+        if (!canvas.width || !canvas.height) continue;
+
         const imgData = canvas.toDataURL("image/png");
         const imgWidth = pdf.internal.pageSize.width - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -268,28 +284,58 @@ export default {
         y += imgHeight + 5;
       }
 
+      // ===== IMAGE GALLERY =====
       const imageGalleryElement = element.querySelector(
         ".image-gallery-section"
       );
+
       if (imageGalleryElement) {
-        const imageGalleryCanvas = await html2canvas(imageGalleryElement, {
+        await this.waitForImages(imageGalleryElement);
+
+        const canvas = await html2canvas(imageGalleryElement, {
           scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
         });
-        const imgData = imageGalleryCanvas.toDataURL("image/png");
-        const imgWidth = pdf.internal.pageSize.width - 20;
-        const imgHeight =
-          (imageGalleryCanvas.height * imgWidth) / imageGalleryCanvas.width;
 
-        if (y + imgHeight > pageHeight - 10) {
-          pdf.addPage();
-          y = 10;
+        if (canvas.width && canvas.height) {
+          const imgData = canvas.toDataURL("image/png");
+          const imgWidth = pdf.internal.pageSize.width - 20;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+          if (y + imgHeight > pageHeight - 10) {
+            pdf.addPage();
+            y = 10;
+          }
+
+          pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
         }
-
-        pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
       }
 
-      pdf.save(`estimate-${this.estimate.date || "document"}.pdf`);
+      pdf.save(
+        `${this.estimate.siteName}-${this.estimate.date || "document"}.pdf`
+      );
     },
+
+    async waitForImages(container) {
+      const images = container.querySelectorAll("img");
+      const promises = [];
+
+      images.forEach((img) => {
+        if (img.complete && img.naturalHeight !== 0) return;
+
+        promises.push(
+          new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve; // don't block PDF for bad images
+          })
+        );
+      });
+
+      await Promise.all(promises);
+    },
+
     async exportToWord() {
       const doc = new Document({
         sections: [
@@ -300,7 +346,7 @@ export default {
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: this.estimate.companyName || "COMPANY NAME",
+                    text: this.estimate.companyName,
                     bold: true,
                     size: 32,
                   }),
@@ -681,6 +727,8 @@ export default {
   color: #000;
 }
 .site-name {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
   text-align: center;
   font-size: 16px;
   font-weight: bold;
