@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-0">
-    
     <div class="a4-container">
       <div class="a4-sheet" ref="estimateSheet">
         <div class="header-section">
@@ -95,7 +94,7 @@
                   </td>
                   <td class="unit-cell">{{ item.unit || "Nos" }}</td>
                   <td class="type-cell">{{ item.type || "-" }}</td>
-                  <td class="quantity-cell">{{ item.quantity  }}</td>
+                  <td class="quantity-cell">{{ item.quantity }}</td>
                   <td class="rate-cell">{{ item.rate }}</td>
                   <td class="price-cell">{{ item.unitPrice }}</td>
                   <td class="total-cell">{{ item.total }}</td>
@@ -166,7 +165,7 @@ export default {
           { label: "Office", number: "0431-2345678" },
         ],
         siteName: "RESIDENTIAL BUILDING PROJECT",
-        purpose: "CONSTRUCTION ESTIMATE",
+        purpose: "",
         description:
           "This is a detailed description of the construction estimate.",
         categories: [

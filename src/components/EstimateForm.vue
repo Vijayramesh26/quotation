@@ -256,7 +256,15 @@ export default {
   data() {
     return {
       valid: false,
-      unitOptions: ["Nos", "Pcs", "Sq.ft", "Cu.ft", "Mtrs", "Lumpsum","Run.ft"],
+      unitOptions: [
+        "Nos",
+        "Pcs",
+        "Sq.ft",
+        "Cu.ft",
+        "Mtrs",
+        "Lumpsum",
+        "Run.ft",
+      ],
     };
   },
   computed: {
