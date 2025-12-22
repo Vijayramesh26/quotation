@@ -1,103 +1,107 @@
 <template>
   <v-container>
-    <v-card class="pa-6">
-      <v-card-title class="text-h4 text-center mb-6">
-        Construction Estimate Form
+    <v-card class="pa-6  elevation-0">
+      <v-card-title 
+        class="text-body-1 font-weight-bold text-md-h5 text-center d-flex align-center justify-center"
+      >
+        HEADER INFO
       </v-card-title>
-
       <v-form ref="form" v-model="valid">
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="estimate.date"
-              label="Date"
-              type="date"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="estimate.companyName"
-              label="Company Name"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-        </v-row>
+        <v-card class=" pa-6 rounded-xl  " outlined>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="estimate.date"
+                label="Date"
+                type="date"
+                outlined
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="estimate.companyName"
+                label="Company Name"
+                outlined
+                required
+              ></v-text-field>
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="estimate.siteName"
-              label="Site Name"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="estimate.purpose"
-              label="Purpose (Header)"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="estimate.siteName"
+                label="Site Name"
+                outlined
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="estimate.purpose"
+                label="Purpose (Header)"
+                outlined
+                required
+              ></v-text-field>
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="estimate.personName"
-              label="Person Name"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="estimate.phoneNumber1"
-              label="Phone Number 1"
-              outlined
-              type="tel"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="estimate.phoneNumber2"
-              label="Phone Number 2 (Optional)"
-              outlined
-              type="tel"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-
+          <v-row>
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="estimate.personName"
+                label="Person Name"
+                outlined
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="estimate.phoneNumber1"
+                label="Phone Number 1"
+                outlined
+                type="tel"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="estimate.phoneNumber2"
+                label="Phone Number 2 (Optional)"
+                outlined
+                type="tel"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card>
         <v-divider class="my-6"></v-divider>
-        <v-card-subtitle class="text-h6 pa-0 mb-4"
-          >Estimate Categories</v-card-subtitle
+        <v-card-subtitle
+          class="text-body-1 font-weight-bold text-md-h5 text-center d-flex align-center justify-center "
+          >CATEGORIES</v-card-subtitle
         >
 
         <v-card
           v-for="(category, categoryIndex) in estimate.categories"
           :key="categoryIndex"
-          class="mb-6 pa-4"
+          class="mb-6 pa-6 rounded-xl  "
           outlined
         >
           <v-row>
-            <v-col cols="12" md="10">
+            <v-col cols="10" md="11">
               <v-text-field
                 v-model="category.name"
                 label="Description / Category"
                 outlined
-                dense
+                
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="2" class="d-flex align-center justify-end">
+            <v-col cols="2" md="1" class="d-flex align-start justify-end">
               <v-btn
                 color="error"
                 icon
                 small
                 @click="removeCategory(categoryIndex)"
+                class="mt-2 ml-4 ml-md-2"
               >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
@@ -115,7 +119,7 @@
                   v-model="item.description"
                   label="Item Description"
                   outlined
-                  dense
+                  
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -126,7 +130,7 @@
                   label="Length"
                   type="number"
                   outlined
-                  dense
+                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
@@ -136,17 +140,17 @@
                   label="Width"
                   type="number"
                   outlined
-                  dense
+                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
-              <v-col cols="6" md="1">
+              <v-col cols="6" md="2">
                 <v-select
                   v-model="item.unit"
                   :items="unitOptions"
                   label="Unit"
                   outlined
-                  dense
+                  
                 ></v-select>
               </v-col>
               <v-col cols="6" md="2">
@@ -155,26 +159,26 @@
                   label="Qty"
                   type="number"
                   outlined
-                  dense
+                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
-              <v-col cols="8" md="2">
+              <v-col cols="12" md="2">
                 <v-text-field
                   v-model.number="item.rate"
                   label="Rate"
                   type="number"
                   outlined
-                  dense
+                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
-              <v-col cols="4" md="2">
+              <v-col cols="12" md="2">
                 <v-text-field
                   :value="item.total"
                   label="Total"
                   outlined
-                  dense
+                  
                   readonly
                 ></v-text-field>
               </v-col>
@@ -185,21 +189,28 @@
                   v-model="item.imageFile"
                   label="Upload Image for this Item (Optional)"
                   accept="image/*"
-                  prepend-icon="mdi-camera"
+                  prepend-inner-icon="mdi-camera"
                   outlined
-                  dense
+                  
+                  :prepend-icon="false"
                 ></v-file-input>
                 <v-btn
                   color="secondary"
                   icon
                   small
                   @click="removeItem(categoryIndex, itemIndex)"
-                  class="ml-2 mr-2"
+                  class="ml-2 mr-2 mb-6"
                 >
-                  <v-icon>mdi-minus</v-icon>
+                  <v-icon class="">mdi-minus</v-icon>
                 </v-btn>
-                <v-btn color="info" icon small @click="addItem(categoryIndex)">
-                  <v-icon>mdi-plus</v-icon>
+                <v-btn
+                  color="info"
+                  icon
+                  small
+                  @click="addItem(categoryIndex)"
+                  class="mb-6 ml-2"
+                >
+                  <v-icon class="">mdi-plus</v-icon>
                 </v-btn>
               </v-col>
             </v-row>
@@ -207,30 +218,33 @@
         </v-card>
 
         <v-row class="mb-4">
-          <v-col cols="12">
-            <v-btn color="primary" outlined @click="addCategory">
+          <v-col cols="12" class="text-end">
+            <v-btn color="teal" outlined @click="addCategory" class="rounded-lg text-body-2 text-md-subtitle-1">
               <v-icon left>mdi-plus</v-icon>
               Add New Category
             </v-btn>
           </v-col>
         </v-row>
 
+        <v-card class="pa-6 rounded-xl " outlined>
         <v-row>
-          <v-col cols="12" class="text-right">
-            <v-card class="pa-4" color="grey lighten-4">
-              <div class="text-h5">
-                <strong
-                  >Grand Total: Rs. {{ grandTotal.toLocaleString() }}</strong
-                >
+          <v-col cols="5" >
+              <div class="text-body-2 text-md-subtitle-1 ">Grand Total: 
               </div>
-            </v-card>
           </v-col>
-        </v-row>
+          <v-col cols="7" class="text-right">
+              <div class="text-subtitle-2 text-md-h6 font-weight-bold">
+                Rs. {{ grandTotal.toLocaleString() }}
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
 
         <v-row class="mt-6">
           <v-col cols="12" class="text-center">
             <v-btn
-              color="primary"
+              color="teal"
+              class="white--text rounded-lg text-body-2 text-md-subtitle-1 font-weight-bold"
               large
               @click="previewEstimate"
               :disabled="!valid"

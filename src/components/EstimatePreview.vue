@@ -131,6 +131,11 @@
         <v-icon left>mdi-file-word-box</v-icon>
         Download Word
       </v-btn>
+      <!-- <v-btn color="deep-purple" @click="translateUserContent" class="ml-3">
+  <v-icon left>mdi-translate</v-icon>
+  Download PDF (தமிழ்)
+</v-btn> -->
+
     </div>
   </v-container>
 </template>
@@ -150,6 +155,7 @@ import {
   ImageRun,
 } from "docx";
 import { saveAs } from "file-saver";
+// import axios from "axios";
 
 export default {
   name: "EstimatePreview",
@@ -646,7 +652,53 @@ export default {
       });
       return paragraphs;
     },
-  },
+  // // Core Translation Helper
+  //   async getTamil(text) {
+  //     if (!text || !isNaN(text) || text.length < 2) return text;
+  //     try {
+  //       const res = await axios.get('https://api.mymemory.translated.net/get', {
+  //         params: { q: text, langpair: 'en|ta' }
+  //       });
+  //       return res.data.responseData.translatedText;
+  //     } catch (e) {
+  //       console.warn("Translation failed for:", text);
+  //       return text;
+  //     }
+  //   },
+
+  //   // Method to translate User Content (Categories, Items, Company Names)
+  //   async translateUserContent() {
+  //     // this.isTranslating = true;
+      
+  //     try {
+  //       // 1. Translate Static Header Data
+  //       this.estimate.companyName = await this.getTamil(this.estimate.companyName);
+  //       this.estimate.siteName = await this.getTamil(this.estimate.siteName);
+  //       this.estimate.personName = await this.getTamil(this.estimate.personName);
+
+  //       // 2. Loop through Dynamic Categories and Items
+  //       for (let category of this.estimate.categories) {
+  //         if (category.name) {
+  //           category.name = await this.getTamil(category.name);
+  //         }
+          
+  //         // Use Promise.all to translate items in a category faster
+  //         const itemPromises = category.items.map(async (item) => {
+  //           item.description = await this.getTamil(item.description);
+  //           item.unit = await this.getTamil(item.unit);
+  //           return item;
+  //         });
+          
+  //         await Promise.all(itemPromises);
+  //       }
+  //       this.exportToPDF();
+  //       alert("Content translated successfully!");
+  //     } catch (error) {
+  //       console.error("Critical translation error:", error);
+  //     } finally {
+  //       // this.isTranslating = false;
+  //     }}
+    },
 };
 </script>
 
