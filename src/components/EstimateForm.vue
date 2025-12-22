@@ -190,9 +190,8 @@
                   label="Upload Image for this Item (Optional)"
                   accept="image/*"
                   prepend-inner-icon="mdi-camera"
+                  prepend-icon=""
                   outlined
-                  
-                  :prepend-icon="false"
                 ></v-file-input>
                 <v-btn
                   color="secondary"

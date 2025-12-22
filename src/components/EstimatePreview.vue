@@ -1,141 +1,183 @@
 <template>
   <v-container fluid class="pa-0">
     <div class="a4-container">
-      <div class="a4-sheet" ref="estimateSheet">
-        <div class="header-section">
-          <div class="company-name">
-            {{ estimate.companyName }}
-          </div>
-
-          <div class="info-row">
-            <div class="date-section">
-              {{ estimate.date }}
+      <div class="responsive-wrapper">
+        <div class="a4-sheet" ref="estimateSheet">
+          <div class="header-section">
+            <div class="company-name">
+              {{ localEstimate.companyName }}
             </div>
-            <div class="person-section">
-              <div class="person-name">{{ estimate.personName }}</div>
-              <div
-                class="phone-numbers"
-                v-if="estimate.phoneNumbers && estimate.phoneNumbers.length"
-              >
+
+            <div class="info-row">
+              <div class="date-section">
+                {{ localEstimate.date }}
+              </div>
+              <div class="person-section">
+                <div class="person-name">{{ localEstimate.personName }}</div>
                 <div
-                  v-for="(phone, index) in estimate.phoneNumbers"
-                  :key="index"
-                  class="phone-bar"
+                  class="phone-numbers"
+                  v-if="
+                    localEstimate.phoneNumbers &&
+                    localEstimate.phoneNumbers.length
+                  "
                 >
-                  <span class="phone-label">{{ phone.label }}:</span>
-                  <span class="phone-number">{{ phone.number }}</span>
+                  <div
+                    v-for="(phone, index) in localEstimate.phoneNumbers"
+                    :key="index"
+                    class="phone-bar"
+                  >
+                    <span class="phone-label">{{ phone.label }}:</span>
+                    <span class="phone-number">{{ phone.number }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="site-name">
-          {{ estimate.siteName }}
-        </div>
+          <div class="site-name">
+            {{ localEstimate.siteName }}
+          </div>
 
-        <div class="purpose-header text-center">
-          {{ estimate.purpose || "CONSTRUCTION ESTIMATE" }}
-        </div>
+          <div class="purpose-header text-center">
+            {{ localEstimate.purpose }}
+          </div>
 
-        <div class="calculation-info">
-          *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for Sq.ft
-          Item*
-        </div>
+          <div class="calculation-info">
+            *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for
+            Sq.ft Item*
+          </div>
 
-        <div class="estimate-table">
-          <table>
-            <thead>
-              <tr>
-                <th class="description-header">Description</th>
-                <th class="dimensions-header">Dimensions</th>
-                <th class="unit-header">Unit</th>
-                <th class="type-header">Sq.ft</th>
-                <th class="quantity-header">Qty</th>
-                <th class="rate-header">
-                  Rate
-                  <br />
-                  <span class="calculation-guide"> (Per Unit) </span>
-                </th>
-                <th class="price-header">
-                  Price
-                  <br />
-                  <span class="calculation-guide"> (Sq.ft x Rate) </span>
-                </th>
-                <th class="total-header">
-                  Total (Rs.)
-                  <br />
-                  <span class="calculation-guide"> (Price x Qty) </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <template
-                v-for="(category, categoryIndex) in estimate.categories || []"
-              >
-                <tr
-                  v-if="category.name"
-                  class="category-row"
-                  :key="`category-${categoryIndex}`"
-                >
-                  <td colspan="8" class="category-cell">{{ category.name }}</td>
+          <div class="estimate-table">
+            <table>
+              <thead>
+                <tr>
+                  <th class="description-header">
+                    Description
+                    <br />
+                    <span class="calculation-guide"> (விளக்கம்) </span>
+                  </th>
+                  <th class="dimensions-header">
+                    Dimensions
+                    <br />
+                    <span class="calculation-guide"> (பரிமாணங்கள்) </span>
+                  </th>
+                  <th class="unit-header">
+                    Unit
+                    <br />
+                    <span class="calculation-guide"> (அலகுகள்) </span>
+                  </th>
+                  <th class="type-header">
+                    Sq.ft
+                    <br />
+                    <span class="calculation-guide"> (சதுர அடி) </span>
+                  </th>
+                  <th class="quantity-header">
+                    Qty
+                    <br />
+                    <span class="calculation-guide"> (அளவு) </span>
+                  </th>
+                  <th class="rate-header">
+                    Rate
+                    <br />
+                    <span class="calculation-guide"> (விலை) </span>
+                  </th>
+                  <th class="price-header">
+                    Price
+                    <br />
+                    <span class="calculation-guide"> (Sq.ft x Rate) </span>
+                  </th>
+                  <th class="total-header">
+                    Total (Rs.)
+                    <br />
+                    <span class="calculation-guide"> (மொத்தம்) </span>
+                  </th>
                 </tr>
-                <tr
-                  v-for="(item, itemIndex) in category.items || []"
-                  :key="`item-${categoryIndex}-${itemIndex}`"
-                  class="item-row-table"
+              </thead>
+              <tbody>
+                <template
+                  v-for="(
+                    category, categoryIndex
+                  ) in localEstimate.categories || []"
                 >
-                  <td class="description-cell">{{ item.description || "" }}</td>
-                  <td class="dimensions-cell">
-                    <span v-if="item.length && item.width"
-                      >{{ item.length }} x {{ item.width }}</span
-                    >
-                    <span v-else>-</span>
+                  <tr
+                    v-if="category.name"
+                    class="category-row"
+                    :key="`category-${categoryIndex}`"
+                  >
+                    <td colspan="8" class="category-cell">
+                      {{ category.name }}
+                    </td>
+                  </tr>
+                  <tr
+                    v-for="(item, itemIndex) in category.items || []"
+                    :key="`item-${categoryIndex}-${itemIndex}`"
+                    class="item-row-table"
+                  >
+                    <td class="description-cell">
+                      {{ item.description || "" }}
+                    </td>
+                    <td class="dimensions-cell">
+                      <span v-if="item.length && item.width"
+                        >{{ item.length }} x {{ item.width }}</span
+                      >
+                      <span v-else>-</span>
+                    </td>
+                    <td class="unit-cell">{{ item.unit || "Nos" }}</td>
+                    <td class="type-cell">{{ item.type || "-" }}</td>
+                    <td class="quantity-cell">{{ item.quantity }}</td>
+                    <td class="rate-cell">{{ item.rate }}</td>
+                    <td class="price-cell">{{ item.unitPrice }}</td>
+                    <td class="total-cell">{{ item.total }}</td>
+                  </tr>
+                </template>
+                <tr class="total-row-table">
+                  <td colspan="7" class="total-label-cell">
+                    Total <br />
+                    <span class="calculation-guide"> (ஆக மொத்தம்) </span>
                   </td>
-                  <td class="unit-cell">{{ item.unit || "Nos" }}</td>
-                  <td class="type-cell">{{ item.type || "-" }}</td>
-                  <td class="quantity-cell">{{ item.quantity }}</td>
-                  <td class="rate-cell">{{ item.rate }}</td>
-                  <td class="price-cell">{{ item.unitPrice }}</td>
-                  <td class="total-cell">{{ item.total }}</td>
+                  <td class="total-amount-cell">{{ calculateTotal() }}</td>
                 </tr>
-              </template>
-              <tr class="total-row-table">
-                <td colspan="7" class="total-label-cell">Total</td>
-                <td class="total-amount-cell">{{ calculateTotal() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
 
-        <div v-if="hasImages" class="image-gallery-section">
-          <div class="image-gallery-header">Image Gallery</div>
-          <div
-            v-for="(image, index) in allImages"
-            :key="`img-${index}`"
-            class="image-figure"
-          >
-            <img :src="image.url" alt="Item Image" class="item-image" />
-            <figcaption>{{ image.description }}</figcaption>
+          <div v-if="hasImages" class="image-gallery-section">
+            <div class="image-gallery-header">Image Gallery</div>
+            <br />
+            <span class="calculation-guide"> (பட தொகுப்பு) </span>
+            <div
+              v-for="(image, index) in allImages"
+              :key="`img-${index}`"
+              class="image-figure"
+            >
+              <img :src="image.url" alt="Item Image" class="item-image" />
+              <figcaption>{{ image.description }}</figcaption>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="text-center mt-2">
-      <v-btn color="primary" @click="exportToPDF" class="mr-4">
+    <div class="text-center mt-6 mb-10 action-buttons">
+      <v-btn color="primary" @click="exportToPDF" class="ma-1">
         <v-icon left>mdi-file-pdf-box</v-icon>
-        Download PDF
+        PDF
       </v-btn>
-      <v-btn color="success" @click="exportToWord">
-        <v-icon left>mdi-file-word-box</v-icon>
-        Download Word
-      </v-btn>
-      <!-- <v-btn color="deep-purple" @click="translateUserContent" class="ml-3">
-  <v-icon left>mdi-translate</v-icon>
-  Download PDF (தமிழ்)
-</v-btn> -->
 
+      <v-btn color="success" @click="exportToWord" class="ma-1">
+        <v-icon left>mdi-file-word-box</v-icon>
+        Word
+      </v-btn>
+
+      <v-btn
+        color="deep-purple"
+        @click="translateUserContent"
+        class="ma-1 white--text"
+        dark
+      >
+        <span class="tamil-icon-btn">அ</span>
+        PDF (தமிழ்)
+      </v-btn>
     </div>
   </v-container>
 </template>
@@ -155,10 +197,21 @@ import {
   ImageRun,
 } from "docx";
 import { saveAs } from "file-saver";
-// import axios from "axios";
+import axios from "axios";
 
 export default {
   name: "EstimatePreview",
+  data() {
+    return {
+      // This will hold the data we actually display and translate
+      localEstimate: null,
+      isTamil: false,
+      loading: false,
+    };
+  },
+  created() {
+    this.initializeData();
+  },
   props: {
     estimate: {
       type: Object,
@@ -230,6 +283,10 @@ export default {
     },
   },
   methods: {
+    initializeData() {
+      const freshCopy = JSON.parse(JSON.stringify(this.estimate));
+      this.localEstimate = Object.assign({}, freshCopy);
+    },
     calculateTotal() {
       let total = 0;
       if (this.estimate && this.estimate.categories) {
@@ -268,16 +325,20 @@ export default {
         const contentElement = element.querySelector(selector);
         if (!contentElement) continue;
 
+        // HIGH CLARITY SETTINGS HERE
         const canvas = await html2canvas(contentElement, {
-          scale: 2,
-          useCORS: true,
+          scale: 5, // 4x resolution for sharp text
+          useCORS: true, // Helps with external images
           allowTaint: false,
           backgroundColor: "#ffffff",
+          dpi: 300, // Print quality DPI
+          letterRendering: true, // Fixes Tamil character spacing
+          logging: false,
         });
 
         if (!canvas.width || !canvas.height) continue;
 
-        const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/png", 1.0);
         const imgWidth = pdf.internal.pageSize.width - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -286,7 +347,17 @@ export default {
           y = 10;
         }
 
-        pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
+        // 'FAST' tells jsPDF not to over-compress the image (keeps it sharp)
+        pdf.addImage(
+          imgData,
+          "PNG",
+          10,
+          y,
+          imgWidth,
+          imgHeight,
+          undefined,
+          "FAST"
+        );
         y += imgHeight + 5;
       }
 
@@ -299,7 +370,7 @@ export default {
         await this.waitForImages(imageGalleryElement);
 
         const canvas = await html2canvas(imageGalleryElement, {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           allowTaint: false,
           backgroundColor: "#ffffff",
@@ -652,63 +723,142 @@ export default {
       });
       return paragraphs;
     },
-  // // Core Translation Helper
-  //   async getTamil(text) {
-  //     if (!text || !isNaN(text) || text.length < 2) return text;
-  //     try {
-  //       const res = await axios.get('https://api.mymemory.translated.net/get', {
-  //         params: { q: text, langpair: 'en|ta' }
-  //       });
-  //       return res.data.responseData.translatedText;
-  //     } catch (e) {
-  //       console.warn("Translation failed for:", text);
-  //       return text;
-  //     }
-  //   },
-
-  //   // Method to translate User Content (Categories, Items, Company Names)
-  //   async translateUserContent() {
-  //     // this.isTranslating = true;
-      
-  //     try {
-  //       // 1. Translate Static Header Data
-  //       this.estimate.companyName = await this.getTamil(this.estimate.companyName);
-  //       this.estimate.siteName = await this.getTamil(this.estimate.siteName);
-  //       this.estimate.personName = await this.getTamil(this.estimate.personName);
-
-  //       // 2. Loop through Dynamic Categories and Items
-  //       for (let category of this.estimate.categories) {
-  //         if (category.name) {
-  //           category.name = await this.getTamil(category.name);
-  //         }
-          
-  //         // Use Promise.all to translate items in a category faster
-  //         const itemPromises = category.items.map(async (item) => {
-  //           item.description = await this.getTamil(item.description);
-  //           item.unit = await this.getTamil(item.unit);
-  //           return item;
-  //         });
-          
-  //         await Promise.all(itemPromises);
-  //       }
-  //       this.exportToPDF();
-  //       alert("Content translated successfully!");
-  //     } catch (error) {
-  //       console.error("Critical translation error:", error);
-  //     } finally {
-  //       // this.isTranslating = false;
-  //     }}
+    // Core Translation Helper
+    async getTamil(text) {
+      if (!text || !isNaN(text) || text.length < 2) return text;
+      try {
+        const res = await axios.get("https://api.mymemory.translated.net/get", {
+          params: { q: text, langpair: "en|ta" },
+        });
+        return res.data.responseData.translatedText;
+      } catch (e) {
+        console.warn("Translation failed for:", text);
+        return text;
+      }
     },
+
+    // Method to translate User Content and then trigger PDF
+    // async translateUserContent() {
+    //   // 1. Start the translation
+    //   try {
+    //     // Translate Header Data
+    //     this.estimate.companyName = await this.getTamil(
+    //       this.estimate.companyName
+    //     );
+    //     this.estimate.siteName = await this.getTamil(this.estimate.siteName);
+    //     this.estimate.personName = await this.getTamil(
+    //       this.estimate.personName
+    //     );
+
+    //     // Translate categories and items
+    //     for (let category of this.estimate.categories) {
+    //       if (category.name) {
+    //         category.name = await this.getTamil(category.name);
+    //       }
+
+    //       const itemPromises = category.items.map(async (item) => {
+    //         item.description = await this.getTamil(item.description);
+    //         item.unit = await this.getTamil(item.unit);
+    //         return item;
+    //       });
+
+    //       await Promise.all(itemPromises);
+    //     }
+
+    //     // 2. CRITICAL: Wait for Vue to update the HTML on your screen with Tamil words
+    //     await this.$nextTick();
+
+    //     // 3. Give the browser a split second to render the Tamil font glyphs
+    //     await new Promise((resolve) => setTimeout(resolve, 500));
+
+    //     // 4. Run the PDF export now that the screen shows Tamil
+    //     await this.exportToPDF();
+    //   } catch (error) {
+    //     console.error("Critical translation error:", error);
+    //     alert("Translation failed. Please check your internet connection.");
+    //   }
+    // },
+    async translateUserContent() {
+      this.loading = true;
+
+      // 1. Reset to original English first to ensure a clean translation
+      this.initializeData();
+
+      try {
+        // 2. Translate the LOCAL COPY only
+        this.localEstimate.companyName = await this.getTamil(
+          this.localEstimate.companyName
+        );
+        this.localEstimate.siteName = await this.getTamil(
+          this.localEstimate.siteName
+        );
+        this.localEstimate.personName = await this.getTamil(
+          this.localEstimate.personName
+        );
+
+        for (let i = 0; i < this.localEstimate.categories.length; i++) {
+          let category = this.localEstimate.categories[i];
+
+          if (category.name) {
+            category.name = await this.getTamil(category.name);
+          }
+
+          for (let j = 0; j < category.items.length; j++) {
+            let item = category.items[j];
+
+            // Use this.$set to force Vue to see the change
+            const translatedDesc = await this.getTamil(item.description);
+            // const translatedUnit = await this.getTamil(item.unit);
+
+            this.$set(
+              this.localEstimate.categories[i].items[j],
+              "description",
+              translatedDesc
+            );
+            // this.$set(this.localEstimate.categories[i].items[j], 'unit', translatedUnit);
+          }
+        }
+
+        // 3. Wait for DOM and Export
+        await this.$nextTick();
+        await new Promise((r) => setTimeout(r, 1000));
+        await this.exportToPDF();
+
+        // 4. Optional: Reset back to English after export
+        this.initializeData();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
 };
 </script>
 
 <style scoped>
+/* 1. Add this at the very top of your <style> block */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&display=swap");
 .a4-container {
   display: flex;
   justify-content: center;
   padding: 20px;
   background-color: #f5f5f5;
   min-height: 100vh;
+}
+.responsive-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+@media only screen and (max-width: 600px) {
+  .responsive-wrapper {
+    /* This forces the high-res A4 sheet to shrink into the mobile view */
+    zoom: 0.4;
+    /* Note: 'zoom' works great in Chrome/Android. 
+       For Safari/iOS, use 'transform: scale()' as shown above. */
+  }
 }
 .a4-sheet {
   width: 210mm;
@@ -717,7 +867,7 @@ export default {
   background: white;
   padding: 20mm 15mm;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-family: "Times New Roman", serif;
+  font-family: "Times New Roman", "Noto Sans Tamil", serif;
   font-size: 14px;
   line-height: 1.4;
   color: #000;
