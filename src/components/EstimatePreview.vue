@@ -302,6 +302,17 @@ export default {
     },
     async exportToPDF() {
       const element = this.$refs.estimateSheet;
+      const clone = element.cloneNode(true);
+
+      clone.classList.add("pdf-export");
+
+      // Force real A4 dimensions
+      clone.style.width = "210mm";
+      clone.style.maxWidth = "210mm";
+      clone.style.transform = "none";
+      clone.style.zoom = "1";
+
+      document.body.appendChild(clone);
 
       // ✅ Wait for Vue DOM update
       await this.$nextTick();
@@ -860,6 +871,19 @@ export default {
        For Safari/iOS, use 'transform: scale()' as shown above. */
   }
 }
+
+.pdf-export {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  z-index: -1;
+  transform: none !important;
+  zoom: 1 !important;
+}
+
 .a4-sheet {
   width: 210mm;
   min-height: 297mm;
