@@ -1,13 +1,13 @@
 <template>
   <v-container>
-    <v-card class="pa-6  elevation-0">
-      <v-card-title 
+    <v-card class="pa-6 elevation-0">
+      <v-card-title
         class="text-body-1 font-weight-bold text-md-h5 text-center d-flex align-center justify-center"
       >
         HEADER INFO
       </v-card-title>
       <v-form ref="form" v-model="valid">
-        <v-card class=" pa-6 rounded-xl  " outlined>
+        <v-card class="pa-6 rounded-xl" outlined>
           <v-row>
             <v-col cols="12" md="6">
               <v-text-field
@@ -76,14 +76,14 @@
         </v-card>
         <v-divider class="my-6"></v-divider>
         <v-card-subtitle
-          class="text-body-1 font-weight-bold text-md-h5 text-center d-flex align-center justify-center "
+          class="text-body-1 font-weight-bold text-md-h5 text-center d-flex align-center justify-center"
           >CATEGORIES</v-card-subtitle
         >
 
         <v-card
           v-for="(category, categoryIndex) in estimate.categories"
           :key="categoryIndex"
-          class="mb-6 pa-6 rounded-xl  "
+          class="mb-6 pa-6 rounded-xl"
           outlined
         >
           <v-row>
@@ -92,7 +92,6 @@
                 v-model="category.name"
                 label="Description / Category"
                 outlined
-                
               ></v-text-field>
             </v-col>
             <v-col cols="2" md="1" class="d-flex align-start justify-end">
@@ -119,7 +118,6 @@
                   v-model="item.description"
                   label="Item Description"
                   outlined
-                  
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -130,7 +128,6 @@
                   label="Length"
                   type="number"
                   outlined
-                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
@@ -140,7 +137,6 @@
                   label="Width"
                   type="number"
                   outlined
-                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
@@ -150,7 +146,7 @@
                   :items="unitOptions"
                   label="Unit"
                   outlined
-                  
+                  @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-select>
               </v-col>
               <v-col cols="6" md="2">
@@ -159,7 +155,6 @@
                   label="Qty"
                   type="number"
                   outlined
-                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
@@ -169,7 +164,6 @@
                   label="Rate"
                   type="number"
                   outlined
-                  
                   @input="calculateItemTotal(categoryIndex, itemIndex)"
                 ></v-text-field>
               </v-col>
@@ -178,7 +172,6 @@
                   :value="item.total"
                   label="Total"
                   outlined
-                  
                   readonly
                 ></v-text-field>
               </v-col>
@@ -218,20 +211,24 @@
 
         <v-row class="mb-4">
           <v-col cols="12" class="text-end">
-            <v-btn color="teal" outlined @click="addCategory" class="rounded-lg text-body-2 text-md-subtitle-1">
+            <v-btn
+              color="teal"
+              outlined
+              @click="addCategory"
+              class="rounded-lg text-body-2 text-md-subtitle-1"
+            >
               <v-icon left>mdi-plus</v-icon>
               Add New Category
             </v-btn>
           </v-col>
         </v-row>
 
-        <v-card class="pa-6 rounded-xl " outlined>
-        <v-row>
-          <v-col cols="5" >
-              <div class="text-body-2 text-md-subtitle-1 ">Grand Total: 
-              </div>
-          </v-col>
-          <v-col cols="7" class="text-right">
+        <v-card class="pa-6 rounded-xl" outlined>
+          <v-row>
+            <v-col cols="5">
+              <div class="text-body-2 text-md-subtitle-1">Grand Total:</div>
+            </v-col>
+            <v-col cols="7" class="text-right">
               <div class="text-subtitle-2 text-md-h6 font-weight-bold">
                 Rs. {{ grandTotal.toLocaleString() }}
               </div>
@@ -246,7 +243,7 @@
               class="white--text rounded-lg text-body-2 text-md-subtitle-1 font-weight-bold"
               large
               @click="previewEstimate"
-              :disabled="!valid"
+              :disabled="isButtonDisabled"
             >
               Preview Estimate
             </v-btn>
@@ -297,6 +294,34 @@ export default {
         );
         return sum + categoryTotal;
       }, 0);
+    },
+    isButtonDisabled() {
+      // 1️⃣ Header validation
+      if (
+        !this.estimate.date ||
+        // !this.estimate.companyName ||
+        !this.estimate.siteName
+        // || !this.estimate.purpose ||
+        // !this.estimate.personName
+      ) {
+        return true;
+      }
+
+      // 2️⃣ Categories + Items validation
+      return this.estimate.categories.some((category) => {
+        // category name required
+        if (!category.name) return true;
+
+        // items validation
+        return category.items.some((item) => {
+          return (
+            // !item.description ||
+            // item.quantity <= 0 ||
+            item.rate <= 0 ||
+            item.total <= 0
+          );
+        });
+      });
     },
   },
   methods: {
@@ -357,7 +382,7 @@ export default {
       let unitPrice;
       let totalValue;
 
-      if (hasDimensions) {
+      if (hasDimensions && item.unit === "Nos") {
         const area = parseFloat(item.length) * parseFloat(item.width);
         item.type = area.toFixed(2);
         unitPrice = area * rate;

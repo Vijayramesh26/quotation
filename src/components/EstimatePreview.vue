@@ -42,10 +42,10 @@
             {{ localEstimate.purpose }}
           </div>
 
-          <div class="calculation-info">
+          <!-- <div class="calculation-info">
             *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for
             Sq.ft Item*
-          </div>
+          </div> -->
 
           <div class="estimate-table">
             <table>

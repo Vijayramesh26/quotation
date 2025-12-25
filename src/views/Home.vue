@@ -1,8 +1,8 @@
 <template>
   <v-app>
     <v-app-bar app dark color="teal ">
-      <v-toolbar-title class="text-body-1 font-weight-bold "
-        > ESTIMATION GENERATOR
+      <v-toolbar-title class="text-body-1 font-weight-bold">
+        ESTIMATION GENERATOR
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="currentView === 'preview'" text @click="goBackToForm">
