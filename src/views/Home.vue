@@ -9,6 +9,9 @@
         <v-icon left>mdi-arrow-left</v-icon>
         Back to Form
       </v-btn>
+      <v-btn color="error" @click="clearStorage" small class="text-caption">
+        <v-icon small>mdi-delete</v-icon> Clear
+      </v-btn>
     </v-app-bar>
 
     <v-main>
@@ -102,6 +105,11 @@ export default {
     },
   },
   methods: {
+    clearStorage() {
+      localStorage.removeItem("estimate-data");
+      location.reload();
+    },
+
     showPreview() {
       this.currentView = "preview";
       this.showSnackbar("Estimate preview generated successfully!", "success");

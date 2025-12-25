@@ -404,6 +404,7 @@ export default {
       pdf.save(
         `${this.estimate.siteName}-${this.estimate.date || "document"}.pdf`
       );
+      localStorage.removeItem("estimate-data");
     },
 
     async waitForImages(container) {

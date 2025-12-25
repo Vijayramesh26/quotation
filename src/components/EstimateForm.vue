@@ -317,8 +317,7 @@ export default {
           return (
             // !item.description ||
             // item.quantity <= 0 ||
-            item.rate <= 0 ||
-            item.total <= 0
+            item.rate <= 0 || item.total <= 0
           );
         });
       });
@@ -415,6 +414,40 @@ export default {
         reader.onload = () => resolve(reader.result);
         reader.onerror = (error) => reject(error);
       });
+    },
+    saveToLocalStorage() {
+      try {
+        localStorage.setItem("estimate-data", JSON.stringify(this.estimate));
+      } catch (e) {
+        console.warn("LocalStorage save failed", e);
+      }
+    },
+
+    loadFromLocalStorage() {
+      const saved = localStorage.getItem("estimate-data");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          this.$emit("input", parsed); // IMPORTANT: update parent model
+          this.localEstimate = JSON.parse(JSON.stringify(parsed));
+        } catch (e) {
+          console.warn("LocalStorage load failed", e);
+        }
+      } else {
+        // First load
+        this.localEstimate = JSON.parse(JSON.stringify(this.estimate));
+      }
+    },
+  },
+  created() {
+    this.loadFromLocalStorage();
+  },
+  watch: {
+    estimate: {
+      deep: true,
+      handler() {
+        this.saveToLocalStorage();
+      },
     },
   },
 };
