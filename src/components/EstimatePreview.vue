@@ -1,96 +1,83 @@
 <template>
-  <v-container fluid class="pa-0">
-    <div class="a4-container">
+  <v-container  class="pa-0 grey lighten-4"  >
+    <div class="a4-container" >
       <div class="responsive-wrapper">
-        <div class="a4-sheet" ref="estimateSheet">
-          <div class="header-section">
-            <div class="company-name">
-              {{ localEstimate.companyName }}
-            </div>
+        <div class="a4-sheet shadow-lg" ref="estimateSheet">
+          <div class="header-section" > 
+            <v-row no-gutters align="center">
+              <v-col cols="8">
+                <div class="company-brand">{{ localEstimate.companyName }}</div>
+                <div class="site-location mt-1">
+                  <v-icon small color="teal">mdi-map-marker</v-icon>
+                  {{ localEstimate.siteName }}
+                </div>
+              </v-col>
+              <v-col cols="4" class="text-right">
+                <div class="doc-type">{{ localEstimate.billType }}</div>
+                <div class="date-label">DATE: {{ localEstimate.date }}</div>
+              </v-col>
+            </v-row>
+          </div>
 
-            <div class="info-row">
-              <div class="date-section">
-                {{ localEstimate.date }}
-              </div>
-              <div class="person-section">
-                <div class="person-name">{{ localEstimate.personName }}</div>
-                <div
-                  class="phone-numbers"
-                  v-if="
-                    localEstimate.phoneNumbers &&
-                    localEstimate.phoneNumbers.length
-                  "
-                >
-                  <div
-                    v-for="(phone, index) in localEstimate.phoneNumbers"
-                    :key="index"
-                    class="phone-bar"
+          <div class="info-grid-bar my-4">
+            <v-row no-gutters>
+              <v-col cols="6" class="pa-4 border-right">
+                <div class="info-group">
+                  <span class="info-label">CLIENT / வாடிக்கையாளர்</span>
+                  <div class="info-value text-uppercase">
+                    {{ localEstimate.clientName || "Valued Client" }}
+                    <div
+                    class="info-sub-value"
+                    v-if="
+                      localEstimate.clientNumber 
+                    "
                   >
-                    <span class="phone-label">{{ phone.label }}:</span>
-                    <span class="phone-number">{{ phone.number }}</span>
+                    <v-icon x-small color="teal">mdi-phone</v-icon>
+                    {{ localEstimate.clientNumber }}
+                  </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </v-col>
+
+              <v-col cols="6" class="pa-4 text-right">
+                <div class="info-group">
+                  <span class="info-label">OWNER / உரிமையாளர்</span>
+                  <div class="info-value text-uppercase">
+                    {{ localEstimate.personName }}
+                  </div>
+                  <div
+                    class="info-sub-value"
+                    v-if="
+                      localEstimate.phoneNumbers &&
+                      localEstimate.phoneNumbers.length
+                    "
+                  >
+                    <v-icon x-small color="teal">mdi-phone</v-icon>
+                    {{ localEstimate.phoneNumbers[0].number }}
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
           </div>
 
-          <div class="site-name">
-            {{ localEstimate.siteName }}
-          </div>
-
-          <div class="purpose-header text-center">
+          <div
+            class="purpose-banner text-center my-4"
+            v-if="localEstimate.purpose"
+          >
             {{ localEstimate.purpose }}
           </div>
 
-          <!-- <div class="calculation-info">
-            *Calculations: Total = (Sq.ft x Qty x Rate) or (Qty x Rate) for
-            Sq.ft Item*
-          </div> -->
-
           <div class="estimate-table">
-            <table>
+            <table class="professional-table">
               <thead>
                 <tr>
-                  <th class="description-header">
-                    Description
-                    <br />
-                    <span class="calculation-guide"> (விளக்கம்) </span>
-                  </th>
-                  <th class="dimensions-header">
-                    Dimensions
-                    <br />
-                    <span class="calculation-guide"> (பரிமாணங்கள்) </span>
-                  </th>
-                  <th class="unit-header">
-                    Unit
-                    <br />
-                    <span class="calculation-guide"> (அலகுகள்) </span>
-                  </th>
-                  <th class="type-header">
-                    Sq.ft
-                    <br />
-                    <span class="calculation-guide"> (சதுர அடி) </span>
-                  </th>
-                  <th class="quantity-header">
-                    Qty
-                    <br />
-                    <span class="calculation-guide"> (அளவு) </span>
-                  </th>
-                  <th class="rate-header">
-                    Rate
-                    <br />
-                    <span class="calculation-guide"> (விலை) </span>
-                  </th>
-                  <th class="price-header">
-                    Price
-                    <br />
-                    <span class="calculation-guide"> (Sq.ft x Rate) </span>
-                  </th>
-                  <th class="total-header">
-                    Total (Rs.)
-                    <br />
-                    <span class="calculation-guide"> (மொத்தம்) </span>
-                  </th>
+                  <th class="text-left">Description / விவரம்</th>
+                  <th class="text-center">Dimensions</th>
+                  <th class="text-center">Sq.ft</th>
+                  <th class="text-center">Unit</th>
+                  <th class="text-center">Qty</th>
+                  <th class="text-right">Rate</th>
+                  <th class="text-right">Total (Rs.)</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,88 +88,103 @@
                 >
                   <tr
                     v-if="category.name"
-                    class="category-row"
-                    :key="`category-${categoryIndex}`"
+                    class="category-divider-row"
+                    :key="`cat-${categoryIndex}`"
                   >
-                    <td colspan="8" class="category-cell">
+                    <td colspan="7" class="category-name-cell">
                       {{ category.name }}
                     </td>
                   </tr>
                   <tr
                     v-for="(item, itemIndex) in category.items || []"
                     :key="`item-${categoryIndex}-${itemIndex}`"
-                    class="item-row-table"
+                    class="data-row"
                   >
-                    <td class="description-cell">
-                      {{ item.description || "" }}
+                    <td class="desc-cell">{{ item.description || "—" }}</td>
+                    <td class="text-center dim-cell">
+                      {{
+                        item.length && item.width
+                          ? `${item.length} × ${item.width}`
+                          : "-"
+                      }}
                     </td>
-                    <td class="dimensions-cell">
-                      <span v-if="item.length && item.width"
-                        >{{ item.length }} x {{ item.width }}</span
-                      >
-                      <span v-else>-</span>
+                    <td class="text-center">{{ item.type || "-" }}</td>
+                    <td class="text-center">{{ item.unit || "Nos" }}</td>
+                    <td class="text-center font-weight-bold">
+                      {{ item.quantity }}
                     </td>
-                    <td class="unit-cell">{{ item.unit || "Nos" }}</td>
-                    <td class="type-cell">{{ item.type || "-" }}</td>
-                    <td class="quantity-cell">{{ item.quantity }}</td>
-                    <td class="rate-cell">{{ item.rate }}</td>
-                    <td class="price-cell">{{ item.unitPrice }}</td>
-                    <td class="total-cell">{{ item.total }}</td>
+                    <td class="text-right">₹{{ item.rate }}</td>
+                    <td class="text-right font-weight-bold">
+                      ₹{{ item.total }}
+                    </td>
                   </tr>
                 </template>
-                <tr class="total-row-table">
-                  <td colspan="7" class="total-label-cell">
-                    Total <br />
-                    <span class="calculation-guide"> (ஆக மொத்தம்) </span>
-                  </td>
-                  <td class="total-amount-cell">{{ calculateTotal() }}</td>
-                </tr>
               </tbody>
+              <tfoot>
+                <tr class="grand-total-row">
+                  <td colspan="6" class="text-right total-label">
+                    GRAND TOTAL (மொத்தம்)
+                  </td>
+                  <td class="text-right total-amount">
+                    ₹ {{ calculateTotal() }}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
 
-          <div v-if="hasImages" class="image-gallery-section">
-            <div class="image-gallery-header">Image Gallery</div>
-            <br />
-            <span class="calculation-guide"> (பட தொகுப்பு) </span>
-            <div
-              v-for="(image, index) in allImages"
-              :key="`img-${index}`"
-              class="image-figure"
-            >
-              <img :src="image.url" alt="Item Image" class="item-image" />
-              <figcaption>{{ image.description }}</figcaption>
+          <div v-if="hasImages" class="image-gallery-section mt-10">
+            <div class="gallery-title d-flex align-center">
+              <v-divider class="mr-4"></v-divider>
+              <span>IMAGE GALLERY / பட தொகுப்பு</span>
+              <v-divider class="ml-4"></v-divider>
             </div>
+            <v-row class="mt-4">
+              <v-col
+                v-for="(image, index) in allImages"
+                :key="index"
+                cols="6"
+                class="pa-2"
+              >
+                <div class="gallery-card">
+                  <img :src="image.url" class="gallery-img" />
+                  <div class="gallery-caption">{{ image.description }}</div>
+                </div>
+              </v-col>
+            </v-row>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="text-center mt-6 mb-10 action-buttons">
-      <v-btn color="primary" @click="exportToPDF" class="ma-1">
-        <v-icon left>mdi-file-pdf-box</v-icon>
-        PDF
+    <v-card class="action-bar-fixed px-6 py-3 rounded-pill elevation-10">
+      <v-btn color="teal" dark @click="exportToPDF" class="mx-2 rounded-lg" :small="$vuetify.breakpoint.xsOnly">
+        <v-icon left>mdi-file-pdf-box</v-icon> PDF
       </v-btn>
-
-      <v-btn color="success" @click="exportToWord" class="ma-1">
-        <v-icon left>mdi-file-word-box</v-icon>
-        Word
+      <v-btn
+        color="blue-grey darken-3"
+        dark
+        @click="exportToWord"
+        class="mx-2 rounded-lg"
+        :small="$vuetify.breakpoint.xsOnly"
+      >
+        <v-icon left>mdi-file-word-box</v-icon> Word
       </v-btn>
-
       <v-btn
         color="deep-purple"
         @click="translateUserContent"
-        class="ma-1 white--text"
-        dark
+        class="mx-2 white--text rounded-lg"
+        :loading="loading"
+        :small="$vuetify.breakpoint.xsOnly"
       >
-        <span class="tamil-icon-btn">அ</span>
-        PDF (தமிழ்)
+        <span class="mr-2 font-weight-black">அ</span> PDF (தமிழ்)
       </v-btn>
-    </div>
+    </v-card>
   </v-container>
 </template>
 
 <script>
+// ... (All your imports remain identical)
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import {
@@ -203,7 +205,6 @@ export default {
   name: "EstimatePreview",
   data() {
     return {
-      // This will hold the data we actually display and translate
       localEstimate: null,
       isTamil: false,
       loading: false,
@@ -216,48 +217,13 @@ export default {
     estimate: {
       type: Object,
       default: () => ({
-        companyName: "ABC CONSTRUCTION COMPANY",
-        date: "21-08-2025",
+        companyName: "ABC CONSTRUCTION",
+        date: "2025-08-21",
         personName: "P.Ramesh",
-        phoneNumbers: [
-          { label: "Mobile", number: "9876543210" },
-          { label: "Office", number: "0431-2345678" },
-        ],
-        siteName: "RESIDENTIAL BUILDING PROJECT",
-        purpose: "",
-        description:
-          "This is a detailed description of the construction estimate.",
-        categories: [
-          {
-            name: "",
-            items: [
-              {
-                description: "",
-                length: "6.5",
-                width: "5",
-                unit: "Nos",
-                quantity: "1",
-                rate: "32.5",
-                unitPrice: "32.5",
-                total: "11050",
-                type: "32.50",
-                imagePreviewUrl: null,
-              },
-              {
-                description: "",
-                length: "",
-                width: "",
-                unit: "Nos",
-                quantity: "1",
-                rate: "27.5",
-                unitPrice: "27.5",
-                total: "9350",
-                type: "-",
-                imagePreviewUrl: null,
-              },
-            ],
-          },
-        ],
+        phoneNumbers: [{ label: "Mobile", number: "9876543210" }],
+        siteName: "RESIDENTIAL PROJECT",
+        purpose: "Proposed Construction Estimate",
+        categories: [],
       }),
     },
   },
@@ -265,14 +231,13 @@ export default {
     allImages() {
       const images = [];
       if (this.estimate && this.estimate.categories) {
-        this.estimate.categories.forEach((category) => {
-          category.items.forEach((item) => {
-            if (item.imagePreviewUrl) {
+        this.estimate.categories.forEach((cat) => {
+          cat.items.forEach((item) => {
+            if (item.imagePreviewUrl)
               images.push({
                 url: item.imagePreviewUrl,
                 description: item.description || "",
               });
-            }
           });
         });
       }
@@ -284,127 +249,94 @@ export default {
   },
   methods: {
     initializeData() {
-      const freshCopy = JSON.parse(JSON.stringify(this.estimate));
-      this.localEstimate = Object.assign({}, freshCopy);
+      this.localEstimate = JSON.parse(JSON.stringify(this.estimate));
     },
     calculateTotal() {
       let total = 0;
-      if (this.estimate && this.estimate.categories) {
-        this.estimate.categories.forEach((category) => {
-          if (category.items) {
-            category.items.forEach((item) => {
-              total += parseFloat(item.total) || 0;
-            });
-          }
+      this.estimate.categories.forEach((cat) => {
+        cat.items.forEach((item) => {
+          total += parseFloat(item.total) || 0;
         });
-      }
-      return total.toFixed(2);
+      });
+      return total.toLocaleString(undefined, { minimumFractionDigits: 2 });
     },
     async exportToPDF() {
+      this.loading = true;
       const element = this.$refs.estimateSheet;
-      const clone = element.cloneNode(true);
 
-      clone.classList.add("pdf-export");
-
-      // Force real A4 dimensions
-      clone.style.width = "210mm";
-      clone.style.maxWidth = "210mm";
-      clone.style.transform = "none";
-      clone.style.zoom = "1";
-
-      document.body.appendChild(clone);
-
-      // ✅ Wait for Vue DOM update
-      await this.$nextTick();
-
-      // ✅ Wait for all images inside estimate sheet
-      await this.waitForImages(element);
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageHeight = pdf.internal.pageSize.height;
-      let y = 10;
-
-      const mainContentSelectors = [
-        ".header-section",
-        ".site-name",
-        ".purpose-header",
-        ".calculation-info",
-        ".estimate-table",
-      ];
-
-      for (const selector of mainContentSelectors) {
-        const contentElement = element.querySelector(selector);
-        if (!contentElement) continue;
-
-        // HIGH CLARITY SETTINGS HERE
-        const canvas = await html2canvas(contentElement, {
-          scale: 5, // 4x resolution for sharp text
-          useCORS: true, // Helps with external images
-          allowTaint: false,
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 3, // High resolution
+          useCORS: true,
           backgroundColor: "#ffffff",
-          dpi: 300, // Print quality DPI
-          letterRendering: true, // Fixes Tamil character spacing
           logging: false,
         });
 
-        if (!canvas.width || !canvas.height) continue;
-
         const imgData = canvas.toDataURL("image/png", 1.0);
-        const imgWidth = pdf.internal.pageSize.width - 20;
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        if (y + imgHeight > pageHeight - 10) {
-          pdf.addPage();
-          y = 10;
-        }
-
-        // 'FAST' tells jsPDF not to over-compress the image (keeps it sharp)
         pdf.addImage(
           imgData,
           "PNG",
-          10,
-          y,
+          0,
+          0,
           imgWidth,
           imgHeight,
           undefined,
           "FAST"
         );
-        y += imgHeight + 5;
+        pdf.save(`${this.localEstimate.siteName || "Estimate"}.pdf`);
+      } catch (e) {
+        console.error("PDF Error", e);
+      } finally {
+        this.loading = false;
       }
-
-      // ===== IMAGE GALLERY =====
-      const imageGalleryElement = element.querySelector(
-        ".image-gallery-section"
-      );
-
-      if (imageGalleryElement) {
-        await this.waitForImages(imageGalleryElement);
-
-        const canvas = await html2canvas(imageGalleryElement, {
-          scale: 3,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
+    },
+    async getTamil(text) {
+      if (!text || !isNaN(text) || text.length < 2) return text;
+      try {
+        const res = await axios.get("https://api.mymemory.translated.net/get", {
+          params: { q: text, langpair: "en|ta" },
         });
-
-        if (canvas.width && canvas.height) {
-          const imgData = canvas.toDataURL("image/png");
-          const imgWidth = pdf.internal.pageSize.width - 20;
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-          if (y + imgHeight > pageHeight - 10) {
-            pdf.addPage();
-            y = 10;
-          }
-
-          pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
-        }
+        return res.data.responseData.translatedText;
+      } catch (e) {
+        return text;
       }
+    },
+    async translateUserContent() {
+      this.loading = true;
+      this.initializeData();
+      try {
+        this.localEstimate.companyName = await this.getTamil(
+          this.localEstimate.companyName
+        );
+        this.localEstimate.siteName = await this.getTamil(
+          this.localEstimate.siteName
+        );
+        this.localEstimate.personName = await this.getTamil(
+          this.localEstimate.personName
+        );
 
-      pdf.save(
-        `${this.estimate.siteName}-${this.estimate.date || "document"}.pdf`
-      );
-      localStorage.removeItem("estimate-data");
+        for (let i = 0; i < this.localEstimate.categories.length; i++) {
+          let category = this.localEstimate.categories[i];
+          if (category.name) category.name = await this.getTamil(category.name);
+          for (let j = 0; j < category.items.length; j++) {
+            category.items[j].description = await this.getTamil(
+              category.items[j].description
+            );
+          }
+        }
+        await this.$nextTick();
+        await new Promise((r) => setTimeout(r, 1000));
+        await this.exportToPDF();
+        this.initializeData(); // Reset to English
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loading = false;
+      }
     },
 
     async waitForImages(container) {
@@ -735,366 +667,217 @@ export default {
       });
       return paragraphs;
     },
-    // Core Translation Helper
-    async getTamil(text) {
-      if (!text || !isNaN(text) || text.length < 2) return text;
-      try {
-        const res = await axios.get("https://api.mymemory.translated.net/get", {
-          params: { q: text, langpair: "en|ta" },
-        });
-        return res.data.responseData.translatedText;
-      } catch (e) {
-        console.warn("Translation failed for:", text);
-        return text;
-      }
-    },
-
-    // Method to translate User Content and then trigger PDF
-    // async translateUserContent() {
-    //   // 1. Start the translation
-    //   try {
-    //     // Translate Header Data
-    //     this.estimate.companyName = await this.getTamil(
-    //       this.estimate.companyName
-    //     );
-    //     this.estimate.siteName = await this.getTamil(this.estimate.siteName);
-    //     this.estimate.personName = await this.getTamil(
-    //       this.estimate.personName
-    //     );
-
-    //     // Translate categories and items
-    //     for (let category of this.estimate.categories) {
-    //       if (category.name) {
-    //         category.name = await this.getTamil(category.name);
-    //       }
-
-    //       const itemPromises = category.items.map(async (item) => {
-    //         item.description = await this.getTamil(item.description);
-    //         item.unit = await this.getTamil(item.unit);
-    //         return item;
-    //       });
-
-    //       await Promise.all(itemPromises);
-    //     }
-
-    //     // 2. CRITICAL: Wait for Vue to update the HTML on your screen with Tamil words
-    //     await this.$nextTick();
-
-    //     // 3. Give the browser a split second to render the Tamil font glyphs
-    //     await new Promise((resolve) => setTimeout(resolve, 500));
-
-    //     // 4. Run the PDF export now that the screen shows Tamil
-    //     await this.exportToPDF();
-    //   } catch (error) {
-    //     console.error("Critical translation error:", error);
-    //     alert("Translation failed. Please check your internet connection.");
-    //   }
-    // },
-    async translateUserContent() {
-      this.loading = true;
-
-      // 1. Reset to original English first to ensure a clean translation
-      this.initializeData();
-
-      try {
-        // 2. Translate the LOCAL COPY only
-        this.localEstimate.companyName = await this.getTamil(
-          this.localEstimate.companyName
-        );
-        this.localEstimate.siteName = await this.getTamil(
-          this.localEstimate.siteName
-        );
-        this.localEstimate.personName = await this.getTamil(
-          this.localEstimate.personName
-        );
-
-        for (let i = 0; i < this.localEstimate.categories.length; i++) {
-          let category = this.localEstimate.categories[i];
-
-          if (category.name) {
-            category.name = await this.getTamil(category.name);
-          }
-
-          for (let j = 0; j < category.items.length; j++) {
-            let item = category.items[j];
-
-            // Use this.$set to force Vue to see the change
-            const translatedDesc = await this.getTamil(item.description);
-            // const translatedUnit = await this.getTamil(item.unit);
-
-            this.$set(
-              this.localEstimate.categories[i].items[j],
-              "description",
-              translatedDesc
-            );
-            // this.$set(this.localEstimate.categories[i].items[j], 'unit', translatedUnit);
-          }
-        }
-
-        // 3. Wait for DOM and Export
-        await this.$nextTick();
-        await new Promise((r) => setTimeout(r, 1000));
-        await this.exportToPDF();
-
-        // 4. Optional: Reset back to English after export
-        this.initializeData();
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.loading = false;
-      }
-    },
   },
 };
 </script>
 
 <style scoped>
-/* 1. Add this at the very top of your <style> block */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+Tamil:wght@400;700&display=swap");
+
 .a4-container {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  background-color: #f5f5f5;
-  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 40px 0;
+  min-height: 100vh; 
 }
-.responsive-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-@media only screen and (max-width: 600px) {
-  .responsive-wrapper {
-    /* This forces the high-res A4 sheet to shrink into the mobile view */
-    zoom: 0.4;
-    /* Note: 'zoom' works great in Chrome/Android. 
-       For Safari/iOS, use 'transform: scale()' as shown above. */
-  }
-}
-
-.pdf-export {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 210mm;
-  min-height: 297mm;
-  background: white;
-  z-index: -1;
-  transform: none !important;
-  zoom: 1 !important;
-}
-
 .a4-sheet {
   width: 210mm;
   min-height: 297mm;
-  max-width: 210mm;
   background: white;
-  padding: 20mm 15mm;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-family: "Times New Roman", "Noto Sans Tamil", serif;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #000;
+  padding: 15mm 12mm;
+  margin: 0 auto;
+  font-family: "Inter", "Noto Sans Tamil", sans-serif;
+  color: #1a1c23;
   position: relative;
-}
-.header-section {
-  margin-bottom: 8px;
-  border-bottom: 1px solid #000;
-  padding-bottom: 5px;
-}
-.company-name {
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #000;
-}
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 5px;
-}
-.date-section {
-  font-size: 14px;
-  font-weight: bold;
-  color: #000;
-}
-.person-section {
-  text-align: right;
-}
-.person-name {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 3px;
-  color: #000;
-}
-.phone-numbers {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.phone-bar {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-}
-.phone-label {
-  min-width: 35px;
-  font-weight: 500;
-}
-.phone-number {
-  min-width: 80px;
-  font-size: 10px;
-  font-weight: 500;
-  color: #000;
-}
-.site-name {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: bold;
-  margin: 8px 0 5px 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #000;
-}
-.purpose-header {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  color: #000;
-}
-.calculation-info {
-  font-style: italic;
-  font-size: 12px;
-  margin-bottom: 10px;
-  text-align: left;
-}
-.estimate-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: "Times New Roman", serif;
-}
-thead th {
-  background-color: #f2f2f2;
-  border-bottom: 2px solid #000;
-  padding: 8px 10px;
-  text-align: left;
-  font-weight: bold;
-}
-th.description-header {
-  width: 20%;
-}
-th.dimensions-header {
-  width: 10%;
-  text-align: center;
-}
-th.unit-header {
-  width: 8%;
-  text-align: center;
-}
-th.type-header {
-  width: 8%;
-  text-align: center;
-}
-th.quantity-header {
-  width: 8%;
-  text-align: center;
-}
-th.rate-header {
-  width: 10%;
-  text-align: right;
-}
-th.price-header {
-  width: 15%;
-  text-align: right;
-}
-th.total-header {
-  width: 15%;
-  text-align: right;
-  line-height: 1.2;
-}
-.category-row .category-cell {
-  font-weight: bold;
-  padding: 10px 0 5px 0;
-  border-bottom: 1px solid #ccc;
-}
-.item-row-table td {
-  padding: 5px 10px;
-  vertical-align: top;
-  border-bottom: 1px dashed #eee;
-}
-.description-cell {
-  font-style: italic;
-  font-size: 13px;
-}
-.dimensions-cell,
-.unit-cell,
-.type-cell,
-.quantity-cell {
-  text-align: center;
-}
-.rate-cell,
-.price-cell,
-.total-cell {
-  text-align: right;
-}
-.total-row-table {
-  font-weight: bold;
-  border-top: 2px solid #000;
-}
-.total-label-cell {
-  text-align: right;
-  padding: 10px 10px 10px 0;
-}
-.total-amount-cell {
-  padding: 10px 10px 10px 0;
-  text-align: right;
-  font-size: 16px;
-  color: #000;
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
-.image-gallery-section {
-  margin-top: 20px;
-  border-top: 1px solid #000;
-  padding-top: 10px;
-}
-.image-gallery-header {
-  font-size: 16px;
-  font-weight: bold;
+/* Header */
+.header-section {
+  border-bottom: 3px solid #009688;
+  padding-bottom: 15px;
   margin-bottom: 10px;
-  text-align: center;
 }
-.image-figure {
-  text-align: center;
+.company-brand {
+  font-size: 28px;
+  font-weight: 900;
+  color: #00796b;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+.site-location {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+.doc-type {
+  font-size: 22px;
+  font-weight: 900;
+  color: #e0e0e0;
+  letter-spacing: 2px;
+}
+.date-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Client Bar */
+.client-info-bar {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 8px;
   margin-bottom: 20px;
-  page-break-inside: avoid;
 }
-.item-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-figcaption {
-  font-style: italic;
-  margin-top: 5px;
-}
-.calculation-guide {
+.client-detail .label {
   font-size: 10px;
-  font-weight: normal;
+  font-weight: 800;
+  color: #999;
   display: block;
 }
+.client-detail .value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Table */
+.professional-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+/* Table Header: Light & Sharp */
+.professional-table thead th {
+  background: #ffffff;             /* Pure white background */
+  color: rgb(13, 83, 83);          /* Dark teal only for text */
+  padding: 12px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-top: 2px solid rgb(13, 83, 83);    /* Solid line on top */
+  border-bottom: 1px solid rgb(13, 83, 83); /* Thin line on bottom */
+}
+
+/* Category Row: Subtle Wash */
+.category-name-cell {
+  background: #f4f8f8;             /* Very faint teal wash */
+  color: rgb(13, 83, 83);
+  font-weight: 800;
+  padding: 10px;
+  font-size: 13px;
+  border-bottom: 1px solid #e0eaea;
+}
+.data-row td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 13px;
+}
+.desc-cell {
+  font-weight: 500;
+  width: 30%;
+}
+.grand-total-row td {
+  padding: 20px 10px;
+}
+.total-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: #666;
+}
+/* Grand Total: Clear Emphasis */
+.total-amount {
+  font-size: 20px;
+  font-weight: 900;
+  color: rgb(13, 83, 83);
+  border-top: 1px solid rgb(13, 83, 83); /* Line above the total */
+}
+
+/* Gallery */
+.gallery-title {
+  color: #999;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.gallery-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.gallery-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+.gallery-caption {
+  padding: 8px;
+  font-size: 11px;
+  text-align: center;
+  background: #f8f9fa;
+  font-style: italic;
+}
+
+/* Fixed Actions */
+.action-bar-fixed {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+}
+.sig-line {
+  border-top: 1px solid #333;
+  width: 150px;
+  margin-left: auto;
+}
+
+.info-grid-bar {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  overflow: hidden;
+}
+.border-right {
+  border-right: 1px solid #e0e0e0;
+}
+.info-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #888;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.info-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+.info-sub-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #00796b;
+}
+/* ===== Mobile Scroll Without Breaking PDF ===== */
+@media (max-width: 768px) {
+  .a4-container {
+    height: 100vh;
+    padding: 0;
+  }
+
+  .responsive-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* A4 stays full size for PDF */
+  .a4-sheet {
+    min-height: 297mm;
+    overflow: visible; /* VERY IMPORTANT */
+  }
+}
+
+
 </style>
