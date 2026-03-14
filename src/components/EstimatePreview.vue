@@ -1,9 +1,9 @@
 <template>
-  <v-container  class="pa-0 grey lighten-4"  >
-    <div class="a4-container" >
+  <v-container class="pa-0 grey lighten-4">
+    <div class="a4-container">
       <div class="responsive-wrapper">
         <div class="a4-sheet shadow-lg" ref="estimateSheet">
-          <div class="header-section" > 
+          <div class="header-section">
             <v-row no-gutters align="center">
               <v-col cols="8">
                 <div class="company-brand">{{ localEstimate.companyName }}</div>
@@ -27,14 +27,12 @@
                   <div class="info-value text-uppercase">
                     {{ localEstimate.clientName || "Valued Client" }}
                     <div
-                    class="info-sub-value"
-                    v-if="
-                      localEstimate.clientNumber 
-                    "
-                  >
-                    <v-icon x-small color="teal">mdi-phone</v-icon>
-                    {{ localEstimate.clientNumber }}
-                  </div>
+                      class="info-sub-value"
+                      v-if="localEstimate.clientNumber"
+                    >
+                      <v-icon x-small color="teal">mdi-phone</v-icon>
+                      {{ localEstimate.clientNumber }}
+                    </div>
                   </div>
                 </div>
               </v-col>
@@ -92,7 +90,8 @@
                     :key="`cat-${categoryIndex}`"
                   >
                     <td colspan="7" class="category-name-cell">
-                      {{ category.name }}
+                      {{ getCategoryOptionLabel(categoryIndex)
+                      }}{{ category.name }}
                     </td>
                   </tr>
                   <tr
@@ -100,7 +99,10 @@
                     :key="`item-${categoryIndex}-${itemIndex}`"
                     class="data-row"
                   >
-                    <td class="desc-cell">{{ item.description || "—" }}</td>
+                    <td class="desc-cell">
+                      {{ getOptionLabel(category, itemIndex)
+                      }}{{ item.description || "—" }}
+                    </td>
                     <td class="text-center dim-cell">
                       {{
                         item.length && item.width
@@ -120,7 +122,7 @@
                   </tr>
                 </template>
               </tbody>
-              <tfoot>
+              <tfoot v-if="localEstimate.showTotal">
                 <tr class="grand-total-row">
                   <td colspan="6" class="text-right total-label">
                     GRAND TOTAL (மொத்தம்)
@@ -158,7 +160,13 @@
     </div>
 
     <v-card class="action-bar-fixed px-6 py-3 rounded-pill elevation-10">
-      <v-btn color="teal" dark @click="exportToPDF" class="mx-2 rounded-lg" :small="$vuetify.breakpoint.xsOnly">
+      <v-btn
+        color="teal"
+        dark
+        @click="exportToPDF"
+        class="mx-2 rounded-lg"
+        :small="$vuetify.breakpoint.xsOnly"
+      >
         <v-icon left>mdi-file-pdf-box</v-icon> PDF
       </v-btn>
       <v-btn
@@ -254,9 +262,13 @@ export default {
     calculateTotal() {
       let total = 0;
       this.estimate.categories.forEach((cat) => {
-        cat.items.forEach((item) => {
-          total += parseFloat(item.total) || 0;
-        });
+        if (!cat.isOption) {
+          cat.items.forEach((item) => {
+            if (!item.isOption) {
+              total += parseFloat(item.total) || 0;
+            }
+          });
+        }
       });
       return total.toLocaleString(undefined, { minimumFractionDigits: 2 });
     },
@@ -285,7 +297,7 @@ export default {
           imgWidth,
           imgHeight,
           undefined,
-          "FAST"
+          "FAST",
         );
         pdf.save(`${this.localEstimate.siteName || "Estimate"}.pdf`);
       } catch (e) {
@@ -310,13 +322,13 @@ export default {
       this.initializeData();
       try {
         this.localEstimate.companyName = await this.getTamil(
-          this.localEstimate.companyName
+          this.localEstimate.companyName,
         );
         this.localEstimate.siteName = await this.getTamil(
-          this.localEstimate.siteName
+          this.localEstimate.siteName,
         );
         this.localEstimate.personName = await this.getTamil(
-          this.localEstimate.personName
+          this.localEstimate.personName,
         );
 
         for (let i = 0; i < this.localEstimate.categories.length; i++) {
@@ -324,7 +336,7 @@ export default {
           if (category.name) category.name = await this.getTamil(category.name);
           for (let j = 0; j < category.items.length; j++) {
             category.items[j].description = await this.getTamil(
-              category.items[j].description
+              category.items[j].description,
             );
           }
         }
@@ -339,6 +351,36 @@ export default {
       }
     },
 
+    getOptionLabel(category, itemIndex) {
+      const item = category.items[itemIndex];
+      if (!item.isOption) return "";
+
+      let optionIndex = 1;
+      for (let i = itemIndex - 1; i >= 0; i--) {
+        if (category.items[i].isOption) {
+          optionIndex++;
+        } else {
+          break;
+        }
+      }
+      return `Option ${optionIndex}: `;
+    },
+
+    getCategoryOptionLabel(categoryIndex) {
+      const category = this.estimate.categories[categoryIndex];
+      if (!category.isOption) return "";
+
+      let optionIndex = 1;
+      for (let i = categoryIndex - 1; i >= 0; i--) {
+        if (this.estimate.categories[i].isOption) {
+          optionIndex++;
+        } else {
+          break;
+        }
+      }
+      return `Option ${optionIndex}: `;
+    },
+
     async waitForImages(container) {
       const images = container.querySelectorAll("img");
       const promises = [];
@@ -350,7 +392,7 @@ export default {
           new Promise((resolve) => {
             img.onload = resolve;
             img.onerror = resolve; // don't block PDF for bad images
-          })
+          }),
         );
       });
 
@@ -494,9 +536,9 @@ export default {
               ],
             }),
           ],
-        })
+        }),
       );
-      this.estimate.categories.forEach((category) => {
+      this.estimate.categories.forEach((category, categoryIndex) => {
         if (category.name) {
           rows.push(
             new TableRow({
@@ -505,7 +547,12 @@ export default {
                   children: [
                     new Paragraph({
                       children: [
-                        new TextRun({ text: category.name, bold: true }),
+                        new TextRun({
+                          text:
+                            this.getCategoryOptionLabel(categoryIndex) +
+                            (category.name || ""),
+                          bold: true,
+                        }),
                       ],
                     }),
                   ],
@@ -520,13 +567,13 @@ export default {
                             children: [new TextRun({ text: "" })],
                           }),
                         ],
-                      })
+                      }),
                   ),
               ],
-            })
+            }),
           );
         }
-        category.items.forEach((item) => {
+        category.items.forEach((item, itemIndex) => {
           const hasDimensions = item.length > 0 && item.width > 0;
           rows.push(
             new TableRow({
@@ -534,7 +581,13 @@ export default {
                 new TableCell({
                   children: [
                     new Paragraph({
-                      children: [new TextRun({ text: item.description || "" })],
+                      children: [
+                        new TextRun({
+                          text:
+                            this.getOptionLabel(category, itemIndex) +
+                            (item.description || ""),
+                        }),
+                      ],
                     }),
                   ],
                 }),
@@ -594,45 +647,49 @@ export default {
                   ],
                 }),
               ],
-            })
+            }),
           );
         });
       });
-      rows.push(
-        new TableRow({
-          children: [
-            ...Array(6)
-              .fill()
-              .map(
-                () =>
-                  new TableCell({
-                    children: [
-                      new Paragraph({ children: [new TextRun({ text: "" })] }),
-                    ],
-                  })
-              ),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: "Total", bold: true })],
-                }),
-              ],
-            }),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `${this.calculateTotal()}`,
-                      bold: true,
+      if (this.estimate.showTotal) {
+        rows.push(
+          new TableRow({
+            children: [
+              ...Array(6)
+                .fill()
+                .map(
+                  () =>
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [new TextRun({ text: "" })],
+                        }),
+                      ],
                     }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        })
-      );
+                ),
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: "Total", bold: true })],
+                  }),
+                ],
+              }),
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `${this.calculateTotal()}`,
+                        bold: true,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        );
+      }
       return rows;
     },
     createImageParagraphs() {
@@ -642,7 +699,7 @@ export default {
           children: [
             new TextRun({ text: "Image Gallery", bold: true, size: 28 }),
           ],
-        })
+        }),
       );
       this.allImages.forEach((image) => {
         paragraphs.push(
@@ -656,13 +713,13 @@ export default {
                 },
               }),
             ],
-          })
+          }),
         );
         paragraphs.push(
           new Paragraph({
             children: [new TextRun({ text: image.description, italics: true })],
             alignment: AlignmentType.CENTER,
-          })
+          }),
         );
       });
       return paragraphs;
@@ -677,7 +734,7 @@ export default {
 .a4-container {
   background-color: #f0f2f5;
   padding: 40px 0;
-  min-height: 100vh; 
+  min-height: 100vh;
 }
 .a4-sheet {
   width: 210mm;
@@ -748,19 +805,19 @@ export default {
 }
 /* Table Header: Light & Sharp */
 .professional-table thead th {
-  background: #ffffff;             /* Pure white background */
-  color: rgb(13, 83, 83);          /* Dark teal only for text */
+  background: #ffffff; /* Pure white background */
+  color: rgb(13, 83, 83); /* Dark teal only for text */
   padding: 12px 8px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  border-top: 2px solid rgb(13, 83, 83);    /* Solid line on top */
+  border-top: 2px solid rgb(13, 83, 83); /* Solid line on top */
   border-bottom: 1px solid rgb(13, 83, 83); /* Thin line on bottom */
 }
 
 /* Category Row: Subtle Wash */
 .category-name-cell {
-  background: #f4f8f8;             /* Very faint teal wash */
+  background: #f4f8f8; /* Very faint teal wash */
   color: rgb(13, 83, 83);
   font-weight: 800;
   padding: 10px;
@@ -878,6 +935,4 @@ export default {
     overflow: visible; /* VERY IMPORTANT */
   }
 }
-
-
 </style>

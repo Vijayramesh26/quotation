@@ -19,9 +19,7 @@
           :size="$vuetify.breakpoint.smAndDown ? 32 : 40"
           :class="$vuetify.breakpoint.smAndDown ? 'mr-1' : 'mr-3'"
         >
-          <v-icon color="teal">
-            mdi-file-document-edit-outline
-          </v-icon>
+          <v-icon color="teal"> mdi-file-document-edit-outline </v-icon>
         </v-avatar>
 
         <div v-if="$vuetify.breakpoint.mdAndUp">
@@ -160,9 +158,11 @@ export default {
         personName: "",
         phoneNumber1: "",
         phoneNumber2: "",
+        showTotal: true,
         categories: [
           {
             name: "",
+            isOption: false,
             items: [
               {
                 description: "",
@@ -174,6 +174,7 @@ export default {
                 unitPrice: 0,
                 total: 0,
                 type: "",
+                isOption: false,
                 imageFile: null,
                 imagePreviewUrl: null,
               },
