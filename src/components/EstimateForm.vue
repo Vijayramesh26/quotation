@@ -141,47 +141,62 @@
             :key="categoryIndex"
             class="mb-10"
           >
-            <div class="d-flex align-center mb-4">
-              <v-avatar
-                color="teal"
-                size="20"
-                class="white--text font-weight-bold mr-3"
-                >{{ categoryIndex + 1 }}</v-avatar
-              >
-              <v-text-field
-                v-model="category.name"
-                placeholder="Category Name (e.g. Civil Works, Electrical)"
-                hide-details
-                full-width
-                class="font-weight-bold"
-              ></v-text-field>
-              <v-checkbox
-                v-model="category.isOption"
-                label="Is Option"
-                dense
-                hide-details
-                color="teal"
-                class="mt-0 pt-0 ml-4 font-weight-black category-option-checkbox"
-              ></v-checkbox>
-              <v-btn
-                icon
-                color="teal"
-                @click="duplicateCategory(categoryIndex)"
-                class="ml-2"
-                title="Duplicate Category"
-              >
-                <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
-              <v-btn
-                icon
-                color="error"
-                @click="removeCategory(categoryIndex)"
-                v-if="estimate.categories.length > 1"
-                class="ml-2"
-              >
-                <v-icon>mdi-delete-outline</v-icon>
-              </v-btn>
-            </div>
+            <v-card-title class="px-4 py-2">
+              <v-row no-gutters align="center" style="width: 100%">
+                <v-col cols="12" md="5">
+                  <v-text-field
+                    v-model="category.name"
+                    placeholder="Category Name (e.g. Civil Works)"
+                    hide-details
+                    dense
+                    class="font-weight-bold"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="4" class="px-md-4 mt-2 mt-md-0">
+                  <v-text-field
+                    v-model="category.notes"
+                    placeholder="Category Notes (optional)"
+                    dense
+                    hide-details
+                    class="caption"
+                    prepend-inner-icon="mdi-note-text-outline"
+                    color="teal lighten-2"
+                  ></v-text-field>
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="3"
+                  class="d-flex align-center justify-end mt-2 mt-md-0"
+                >
+                  <v-checkbox
+                    v-model="category.isOption"
+                    label="Is Option"
+                    dense
+                    hide-details
+                    color="teal"
+                    class="mt-0 pt-0 font-weight-black category-option-checkbox"
+                  ></v-checkbox>
+                  <v-btn
+                    icon
+                    color="teal"
+                    @click="duplicateCategory(categoryIndex)"
+                    class="ml-2"
+                    title="Duplicate Category"
+                  >
+                    <v-icon>mdi-content-copy</v-icon>
+                  </v-btn>
+                  <v-btn
+                    icon
+                    color="error"
+                    @click="removeCategory(categoryIndex)"
+                    v-if="estimate.categories.length > 1"
+                    class="ml-2"
+                  >
+                    <v-icon>mdi-delete-outline</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-card-title>
 
             <v-card class="rounded-xl overflow-hidden elevation-1 bg-white">
               <div
@@ -248,6 +263,7 @@
                       dense
                       outlined
                       hide-details
+                      class="text-right-input"
                       @input="calculateItemTotal(categoryIndex, itemIndex)"
                     ></v-text-field>
                   </v-col>
@@ -260,7 +276,7 @@
                       readonly
                       hide-details
                       color="teal"
-                      class="font-weight-bold"
+                      class="font-weight-bold text-right-input"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -419,6 +435,9 @@
   font-weight: 800;
   color: #00796b !important;
 }
+.text-right-input >>> input {
+  text-align: right !important;
+}
 </style>
 
 <script>
@@ -497,6 +516,7 @@ export default {
       this.estimate.categories.push({
         name: "",
         isOption: false,
+        notes: "",
         items: [
           {
             description: "",

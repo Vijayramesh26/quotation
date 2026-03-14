@@ -163,6 +163,7 @@ export default {
           {
             name: "",
             isOption: false,
+            notes: "",
             items: [
               {
                 description: "",

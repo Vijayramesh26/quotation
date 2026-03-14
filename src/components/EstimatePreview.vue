@@ -94,6 +94,11 @@
                       }}{{ category.name }}
                     </td>
                   </tr>
+                  <tr v-if="category.notes" :key="`cat-note-${categoryIndex}`">
+                    <td colspan="7" class="category-notes-cell">
+                      {{ category.notes }}
+                    </td>
+                  </tr>
                   <tr
                     v-for="(item, itemIndex) in category.items || []"
                     :key="`item-${categoryIndex}-${itemIndex}`"
@@ -490,6 +495,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Dimensions", bold: true })],
+                  alignment: AlignmentType.CENTER,
                 }),
               ],
             }),
@@ -497,6 +503,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Unit", bold: true })],
+                  alignment: AlignmentType.CENTER,
                 }),
               ],
             }),
@@ -504,6 +511,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Sq.ft", bold: true })],
+                  alignment: AlignmentType.CENTER,
                 }),
               ],
             }),
@@ -511,6 +519,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Qty", bold: true })],
+                  alignment: AlignmentType.CENTER,
                 }),
               ],
             }),
@@ -518,6 +527,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Rate", bold: true })],
+                  alignment: AlignmentType.RIGHT,
                 }),
               ],
             }),
@@ -525,6 +535,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Price", bold: true })],
+                  alignment: AlignmentType.RIGHT,
                 }),
               ],
             }),
@@ -532,6 +543,7 @@ export default {
               children: [
                 new Paragraph({
                   children: [new TextRun({ text: "Total (Rs.)", bold: true })],
+                  alignment: AlignmentType.RIGHT,
                 }),
               ],
             }),
@@ -572,6 +584,28 @@ export default {
               ],
             }),
           );
+          if (category.notes) {
+            rows.push(
+              new TableRow({
+                children: [
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: category.notes,
+                            italics: true,
+                            size: 20,
+                          }),
+                        ],
+                      }),
+                    ],
+                    columnSpan: 8,
+                  }),
+                ],
+              }),
+            );
+          }
         }
         category.items.forEach((item, itemIndex) => {
           const hasDimensions = item.length > 0 && item.width > 0;
@@ -601,6 +635,7 @@ export default {
                             : "-",
                         }),
                       ],
+                      alignment: AlignmentType.CENTER,
                     }),
                   ],
                 }),
@@ -608,6 +643,7 @@ export default {
                   children: [
                     new Paragraph({
                       children: [new TextRun({ text: item.unit || "No" })],
+                      alignment: AlignmentType.CENTER,
                     }),
                   ],
                 }),
@@ -615,6 +651,7 @@ export default {
                   children: [
                     new Paragraph({
                       children: [new TextRun({ text: item.type || "-" })],
+                      alignment: AlignmentType.CENTER,
                     }),
                   ],
                 }),
@@ -622,20 +659,25 @@ export default {
                   children: [
                     new Paragraph({
                       children: [new TextRun({ text: item.quantity || "1" })],
+                      alignment: AlignmentType.CENTER,
                     }),
                   ],
                 }),
                 new TableCell({
                   children: [
                     new Paragraph({
-                      children: [new TextRun({ text: item.rate || "" })],
+                      children: [new TextRun({ text: `${item.rate || ""}` })],
+                      alignment: AlignmentType.RIGHT,
                     }),
                   ],
                 }),
                 new TableCell({
                   children: [
                     new Paragraph({
-                      children: [new TextRun({ text: item.unitPrice || "" })],
+                      children: [
+                        new TextRun({ text: `${item.unitPrice || ""}` }),
+                      ],
+                      alignment: AlignmentType.RIGHT,
                     }),
                   ],
                 }),
@@ -643,6 +685,7 @@ export default {
                   children: [
                     new Paragraph({
                       children: [new TextRun({ text: `${item.total}` })],
+                      alignment: AlignmentType.RIGHT,
                     }),
                   ],
                 }),
@@ -683,6 +726,7 @@ export default {
                         bold: true,
                       }),
                     ],
+                    alignment: AlignmentType.RIGHT,
                   }),
                 ],
               }),
@@ -823,6 +867,14 @@ export default {
   padding: 10px;
   font-size: 13px;
   border-bottom: 1px solid #e0eaea;
+}
+.category-notes-cell {
+  background: #fdfdfd;
+  color: #666;
+  font-size: 11px;
+  font-style: italic;
+  padding: 4px 10px 10px 10px;
+  border-bottom: 1px solid #edf2f7;
 }
 .data-row td {
   padding: 12px 8px;
