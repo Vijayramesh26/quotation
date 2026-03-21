@@ -136,6 +136,43 @@
                     ₹ {{ calculateTotal() }}
                   </td>
                 </tr>
+                <template
+                  v-if="localEstimate.advances && localEstimate.advances.length"
+                >
+                  <tr
+                    v-for="(adv, idx) in localEstimate.advances"
+                    :key="'adv-' + idx"
+                    class="advance-row"
+                  >
+                    <td colspan="6" class="text-right total-label">
+                      Less: Advance Received
+                      {{ adv.date ? `(${adv.date})` : "" }}
+                    </td>
+                    <td class="text-right total-amount" style="color: #c62828">
+                      - ₹
+                      {{
+                        (parseFloat(adv.amount) || 0).toLocaleString(
+                          undefined,
+                          { minimumFractionDigits: 2 },
+                        )
+                      }}
+                    </td>
+                  </tr>
+                  <tr class="net-balance-row">
+                    <td
+                      colspan="6"
+                      class="text-right total-label font-weight-black"
+                    >
+                      NET BALANCE DUE (மீதமுள்ள தொகை)
+                    </td>
+                    <td
+                      class="text-right total-amount font-weight-black"
+                      style="font-size: 1.2rem; color: #00796b"
+                    >
+                      ₹ {{ calculateNetBalance() }}
+                    </td>
+                  </tr>
+                </template>
               </tfoot>
             </table>
           </div>
@@ -276,6 +313,16 @@ export default {
         }
       });
       return total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    },
+    calculateNetBalance() {
+      const subtotal = parseFloat(this.calculateTotal().replace(/,/g, "")) || 0;
+      const advances = (this.localEstimate.advances || []).reduce(
+        (sum, adv) => sum + (parseFloat(adv.amount) || 0),
+        0,
+      );
+      return (subtotal - advances).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+      });
     },
     async exportToPDF() {
       this.loading = true;
@@ -698,24 +745,19 @@ export default {
         rows.push(
           new TableRow({
             children: [
-              ...Array(6)
-                .fill()
-                .map(
-                  () =>
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          children: [new TextRun({ text: "" })],
-                        }),
-                      ],
-                    }),
-                ),
               new TableCell({
                 children: [
                   new Paragraph({
-                    children: [new TextRun({ text: "Total", bold: true })],
+                    children: [
+                      new TextRun({
+                        text: "GRAND TOTAL (மொத்தம்)",
+                        bold: true,
+                      }),
+                    ],
+                    alignment: AlignmentType.RIGHT,
                   }),
                 ],
+                columnSpan: 7,
               }),
               new TableCell({
                 children: [
@@ -733,6 +775,85 @@ export default {
             ],
           }),
         );
+
+        if (this.estimate.advances && this.estimate.advances.length) {
+          this.estimate.advances.forEach((adv) => {
+            rows.push(
+              new TableRow({
+                children: [
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: `Less: Advance Received ${
+                              adv.date ? `(${adv.date})` : ""
+                            }`,
+                            italics: true,
+                          }),
+                        ],
+                        alignment: AlignmentType.RIGHT,
+                      }),
+                    ],
+                    columnSpan: 7,
+                  }),
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: `- ${parseFloat(
+                              adv.amount || 0,
+                            ).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                            })}`,
+                            color: "C62828",
+                          }),
+                        ],
+                        alignment: AlignmentType.RIGHT,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            );
+          });
+
+          rows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "NET BALANCE DUE (மீதமுள்ள தொகை)",
+                          bold: true,
+                        }),
+                      ],
+                      alignment: AlignmentType.RIGHT,
+                    }),
+                  ],
+                  columnSpan: 7,
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `${this.calculateNetBalance()}`,
+                          bold: true,
+                          size: 28,
+                        }),
+                      ],
+                      alignment: AlignmentType.RIGHT,
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          );
+        }
       }
       return rows;
     },
@@ -895,10 +1016,18 @@ export default {
 }
 /* Grand Total: Clear Emphasis */
 .total-amount {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 900;
   color: rgb(13, 83, 83);
   border-top: 1px solid rgb(13, 83, 83); /* Line above the total */
+}
+
+.advance-row td {
+  padding: 8px 10px;
+}
+
+.net-balance-row td {
+  padding-top: 25px !important;
 }
 
 /* Gallery */

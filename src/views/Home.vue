@@ -182,6 +182,7 @@ export default {
             ],
           },
         ],
+        advances: [],
       },
       snackbar: { show: false, message: "", color: "success" },
     };

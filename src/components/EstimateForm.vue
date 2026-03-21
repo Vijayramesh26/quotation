@@ -338,6 +338,93 @@
           >
             <v-icon left>mdi-plus-box</v-icon> Add Another Category
           </v-btn>
+
+          <v-divider class="my-8"></v-divider>
+
+          <div class="d-flex align-center mb-4">
+            <v-icon color="teal" class="mr-2">mdi-cash-plus</v-icon>
+            <h3 class="teal--text text--darken-2">
+              Advance Received / முன்பணம்
+            </h3>
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              color="teal"
+              dark
+              @click="addAdvance"
+              class="rounded-lg"
+            >
+              <v-icon left>mdi-plus</v-icon> Add Advance
+            </v-btn>
+          </div>
+
+          <v-card
+            v-if="estimate.advances && estimate.advances.length"
+            class="rounded-xl overflow-hidden elevation-1 mb-10"
+          >
+            <div
+              v-for="(adv, advIndex) in estimate.advances"
+              :key="advIndex"
+              class="pa-4 border-bottom"
+            >
+              <v-row align="center">
+                <v-col cols="12" sm="5">
+                  <v-menu
+                    v-model="adv.menu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="adv.date"
+                        label="Date (Optional)"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        dense
+                        outlined
+                        hide-details
+                        clearable
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="adv.date"
+                      @input="adv.menu = false"
+                      color="teal"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="10" sm="5">
+                  <v-text-field
+                    v-model.number="adv.amount"
+                    label="Amount (Rs.)"
+                    type="number"
+                    prefix="₹"
+                    dense
+                    outlined
+                    hide-details
+                    class="text-right-input font-weight-bold"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="2" class="text-right">
+                  <v-btn
+                    icon
+                    color="error"
+                    small
+                    @click="removeAdvance(advIndex)"
+                  >
+                    <v-icon>mdi-delete-outline</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </div>
+          </v-card>
+          <v-alert v-else type="info" text dense class="rounded-lg mb-10">
+            No advance payments recorded yet.
+          </v-alert>
         </v-form>
       </v-col>
     </v-row>
@@ -356,13 +443,21 @@
                 class="text-caption grey--text text-uppercase font-weight-black line-height-1 mb-1"
                 style="font-size: 0.65rem !important"
               >
-                Total <span class="hidden-xs-only">Estimate</span>
+                {{ totalAdvances > 0 ? "Net Balance" : "Total Estimate" }}
               </span>
               <div
                 :class="$vuetify.breakpoint.xs ? 'text-subtitle-1' : 'text-h5'"
                 class="font-weight-black teal--text line-height-1"
               >
-                ₹ {{ estimate.showTotal ? grandTotal.toLocaleString() : "***" }}
+                ₹
+                {{
+                  estimate.showTotal
+                    ? (totalAdvances > 0
+                        ? netTotal
+                        : grandTotal
+                      ).toLocaleString()
+                    : "***"
+                }}
               </div>
             </div>
           </v-col>
@@ -482,6 +577,16 @@ export default {
         }, 0);
         return sum + categoryTotal;
       }, 0);
+    },
+    totalAdvances() {
+      if (!this.estimate.advances) return 0;
+      return this.estimate.advances.reduce(
+        (sum, adv) => sum + (parseFloat(adv.amount) || 0),
+        0,
+      );
+    },
+    netTotal() {
+      return this.grandTotal - this.totalAdvances;
     },
     isButtonDisabled() {
       // 1️⃣ Header validation
@@ -631,6 +736,8 @@ export default {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
+          // Ensure advances array exists if loading older data
+          if (!parsed.advances) parsed.advances = [];
           this.$emit("input", parsed); // IMPORTANT: update parent model
           this.localEstimate = JSON.parse(JSON.stringify(parsed));
         } catch (e) {
@@ -640,6 +747,19 @@ export default {
         // First load
         this.localEstimate = JSON.parse(JSON.stringify(this.estimate));
       }
+    },
+    addAdvance() {
+      if (!this.estimate.advances) {
+        this.$set(this.estimate, "advances", []);
+      }
+      this.estimate.advances.push({
+        date: "",
+        amount: 0,
+        menu: false,
+      });
+    },
+    removeAdvance(index) {
+      this.estimate.advances.splice(index, 1);
     },
   },
   created() {
