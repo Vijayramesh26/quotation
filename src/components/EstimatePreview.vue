@@ -177,7 +177,11 @@
             </table>
           </div>
 
-          <div v-if="hasImages" class="image-gallery-section mt-10">
+          <div
+            v-if="hasImages"
+            class="image-gallery-section mt-10"
+            style="page-break-before: always"
+          >
             <div class="gallery-title d-flex align-center">
               <v-divider class="mr-4"></v-divider>
               <span>IMAGE GALLERY / பட தொகுப்பு</span>
@@ -247,6 +251,7 @@ import {
   TextRun,
   AlignmentType,
   ImageRun,
+  PageBreak,
 } from "docx";
 import { saveAs } from "file-saver";
 import axios from "axios";
@@ -339,8 +344,14 @@ export default {
         const imgData = canvas.toDataURL("image/png", 1.0);
         const pdf = new jsPDF("p", "mm", "a4");
         const imgWidth = 210;
+        const pageHeight = 297;
+        const marginTop = 20;
+        const marginBottom = 20;
+        const innerPageHeight = pageHeight - marginTop - marginBottom;
+
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
+        // Page 1: Initial full page (using natural HTML header/footer)
         pdf.addImage(
           imgData,
           "PNG",
@@ -351,6 +362,30 @@ export default {
           undefined,
           "FAST",
         );
+
+        let canvasOffset = pageHeight;
+        let heightLeft = imgHeight - pageHeight;
+
+        // Following Pages: Standardize with header/footer space
+        while (heightLeft > 0) {
+          pdf.addPage();
+          // The content at 'canvasOffset' should appear at 'marginTop'
+          const drawPosition = marginTop - canvasOffset;
+
+          pdf.addImage(
+            imgData,
+            "PNG",
+            0,
+            drawPosition,
+            imgWidth,
+            imgHeight,
+            undefined,
+            "FAST",
+          );
+
+          canvasOffset += innerPageHeight;
+          heightLeft -= innerPageHeight;
+        }
         pdf.save(`${this.localEstimate.siteName || "Estimate"}.pdf`);
       } catch (e) {
         console.error("PDF Error", e);
@@ -518,6 +553,7 @@ export default {
               new Table({
                 rows: this.createTableRows(),
               }),
+              this.hasImages ? new PageBreak() : new Paragraph({ text: "" }),
               ...this.createImageParagraphs(),
             ],
           },
@@ -873,8 +909,8 @@ export default {
               new ImageRun({
                 data: image.url,
                 transformation: {
-                  width: 500,
-                  height: 300,
+                  width: 550, // Taking up most of the page width
+                  height: 350,
                 },
               }),
             ],
@@ -1044,8 +1080,9 @@ export default {
 }
 .gallery-img {
   width: 100%;
-  height: 180px;
+  height: 250px;
   object-fit: cover;
+  display: block;
 }
 .gallery-caption {
   padding: 8px;
